@@ -3,4 +3,6 @@
 *.iml
 *.test
 *.prof
+*.exe
 vendor/
+
