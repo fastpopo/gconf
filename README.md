@@ -13,7 +13,7 @@
 Introduction
 ------------
 
-gconf is a framework for accessing Key/Value based configuration settings in an pllication. Includes configuration providers for environment variables, JSON files, YAML files.
+gconf is a framework for accessing Key/Value based configuration settings in an apllication. Includes configuration providers for environment variables, JSON files, YAML files.
 
 
 Installation and usage
@@ -55,7 +55,13 @@ func main() {
 Test
 ----
 
-     go test
+     $ go test
+
+This example will generate the following output:
+
+     Testing with test/sample.json
+     PASS
+     ok  	github.com/fastpopo/gconf	0.001s
 
 
 License
