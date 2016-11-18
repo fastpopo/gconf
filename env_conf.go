@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fastpopo/gconf/envconf"
-	"sync"
 )
 
 type _EnvConfProvider struct {
@@ -12,7 +11,6 @@ type _EnvConfProvider struct {
 	source      ConfSource
 	reloadToken ReloadToken
 	prefix      string
-	m           sync.Mutex
 }
 
 func newEnvConfProvider(source ConfSource, prefix string) ConfProvider {

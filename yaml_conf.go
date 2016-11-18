@@ -4,14 +4,12 @@ import (
 	"errors"
 	"github.com/fastpopo/gconf/yamlconf"
 	"log"
-	"sync"
 )
 
 type _YamlFileConfProvider struct {
 	data        map[string]interface{}
 	source      FileConfSource
 	reloadToken ReloadToken
-	m           sync.Mutex
 }
 
 func newYamlFileConfProvider(source FileConfSource) FileConfProvider {

@@ -3,7 +3,6 @@ package gconf
 import (
 	"errors"
 	"log"
-	"sync"
 
 	"github.com/fastpopo/gconf/jsonconf"
 )
@@ -12,7 +11,6 @@ type _JsonFileConfProvider struct {
 	data        map[string]interface{}
 	source      FileConfSource
 	reloadToken ReloadToken
-	m           sync.Mutex
 }
 
 func newJsonFileConfProvider(source FileConfSource) FileConfProvider {

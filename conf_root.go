@@ -2,35 +2,50 @@ package gconf
 
 import "errors"
 
-type _ConfigurationRoot struct {
-	providers   []ConfProvider
+type _ProviderItem struct {
+	provider ConfProvider
+	token    ReloadToken
+}
+
+type _ConfRoot struct {
+	providers   []_ProviderItem
 	reloadToken ReloadToken
 }
 
 func newConfRoot(providers []ConfProvider) ConfRoot {
-	return &_ConfigurationRoot{
-		providers:   providers,
+	root := &_ConfRoot{
 		reloadToken: NewReloadToken(),
 	}
+
+	for _, p := range providers {
+		item := _ProviderItem{
+			provider: p,
+			token:    p.GetReloadToken(),
+		}
+
+		root.providers = append(root.providers, item)
+	}
+
+	return root
 }
 
-func (c *_ConfigurationRoot) Get(key string) interface{} {
+func (c *_ConfRoot) Get(key string) interface{} {
 	if key == "" {
 		return nil
 	}
 
-	for _, provider := range c.providers {
-		if provider.ContainKey(key) == false {
+	for _, p := range c.providers {
+		if p.provider.ContainKey(key) == false {
 			continue
 		}
 
-		return provider.Get(key)
+		return p.provider.Get(key)
 	}
 
 	return nil
 }
 
-func (c *_ConfigurationRoot) TryGet(key string, defaultValue interface{}) interface{} {
+func (c *_ConfRoot) TryGet(key string, defaultValue interface{}) interface{} {
 	if key == "" {
 		return defaultValue
 	}
@@ -44,7 +59,7 @@ func (c *_ConfigurationRoot) TryGet(key string, defaultValue interface{}) interf
 	return result
 }
 
-func (c *_ConfigurationRoot) Set(key string, value interface{}) error {
+func (c *_ConfRoot) Set(key string, value interface{}) error {
 
 	if key == "" {
 		return errors.New("[_ConfigurationRoot::Set] invalid null argument: key")
@@ -54,22 +69,22 @@ func (c *_ConfigurationRoot) Set(key string, value interface{}) error {
 		return errors.New("[_ConfigurationRoot::Set] there is no configuration provider")
 	}
 
-	for _, provider := range c.providers {
-		if provider.ContainKey(key) == true {
-			return provider.Set(key, value)
+	for _, p := range c.providers {
+		if p.provider.ContainKey(key) == true {
+			return p.provider.Set(key, value)
 		}
 	}
 
-	return c.providers[0].Set(key, value)
+	return c.providers[0].provider.Set(key, value)
 }
 
-func (c *_ConfigurationRoot) ContainKey(key string) bool {
+func (c *_ConfRoot) ContainKey(key string) bool {
 	if key == "" {
 		return false
 	}
 
-	for _, provider := range c.providers {
-		if provider.ContainKey(key) == true {
+	for _, p := range c.providers {
+		if p.provider.ContainKey(key) == true {
 			return true
 		}
 	}
@@ -77,28 +92,32 @@ func (c *_ConfigurationRoot) ContainKey(key string) bool {
 	return false
 }
 
-func (c *_ConfigurationRoot) Keys() []string {
+func (c *_ConfRoot) Keys() []string {
 	var keys []string
 
-	for _, provider := range c.providers {
-		keys = append(keys, provider.Keys()...)
+	for _, p := range c.providers {
+		keys = append(keys, p.provider.Keys()...)
 	}
 
 	return keys
 }
 
-func (c *_ConfigurationRoot) Values() []interface{} {
+func (c *_ConfRoot) Values() []interface{} {
 	var values []interface{}
 
-	for _, provider := range c.providers {
-		values = append(values, provider.Values()...)
+	for _, p := range c.providers {
+		values = append(values, p.provider.Values()...)
 	}
 
 	return values
 }
 
-func (c *_ConfigurationRoot) Reload() {
-	for _, provider := range c.providers {
-		provider.Load()
+func (c *_ConfRoot) Reload() {
+	for _, p := range c.providers {
+		if p.token.HasChanged() == false {
+			continue
+		}
+
+		p.provider.Load()
 	}
 }
