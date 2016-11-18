@@ -88,6 +88,14 @@ func (p *_EnvConfProvider) Values() []interface{} {
 	return values
 }
 
+func (p *_EnvConfProvider) GetSection(key string) ConfSection {
+	return newConfSection(p, key)
+}
+
+func (p *_EnvConfProvider) Reload() {
+	p.Load()
+}
+
 func (p *_EnvConfProvider) GetReloadToken() ReloadToken {
 	return p.reloadToken
 }

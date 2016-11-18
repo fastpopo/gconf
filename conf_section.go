@@ -75,6 +75,10 @@ func (c *_ConfigurationSection) Values() []interface{} {
 	return values
 }
 
+func (c *_ConfigurationSection) GetSection(key string) ConfSection {
+	return c.root.GetSection(PathCombine(c.path, key))
+}
+
 func (c *_ConfigurationSection) GetKey() string {
 	return GetSectionKey(c.path)
 }

@@ -85,6 +85,14 @@ func (p *_MemConfProvider) Values() []interface{} {
 	return values
 }
 
+func (p *_MemConfProvider) GetSection(key string) ConfSection {
+	return newConfSection(p, key)
+}
+
+func (p *_MemConfProvider) Reload() {
+	p.Load()
+}
+
 func (p *_MemConfProvider) GetReloadToken() ReloadToken {
 	return p.reloadToken
 }

@@ -112,6 +112,10 @@ func (c *_ConfRoot) Values() []interface{} {
 	return values
 }
 
+func (c *_ConfRoot) GetSection(key string) ConfSection {
+	return newConfSection(c, key)
+}
+
 func (c *_ConfRoot) Reload() {
 	for _, p := range c.providers {
 		if p.token.HasChanged() == false {

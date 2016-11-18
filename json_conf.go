@@ -24,12 +24,12 @@ func newJsonFileConfProvider(source FileConfSource) FileConfProvider {
 	return p
 }
 
-func (f *_JsonFileConfProvider) Get(key string) interface{} {
+func (p *_JsonFileConfProvider) Get(key string) interface{} {
 	if key == "" {
 		return nil
 	}
 
-	value, exist := f.data[key]
+	value, exist := p.data[key]
 
 	if exist == false {
 		return nil
@@ -38,8 +38,8 @@ func (f *_JsonFileConfProvider) Get(key string) interface{} {
 	return value
 }
 
-func (f *_JsonFileConfProvider) TryGet(key string, defaultValue interface{}) interface{} {
-	value := f.Get(key)
+func (p *_JsonFileConfProvider) TryGet(key string, defaultValue interface{}) interface{} {
+	value := p.Get(key)
 
 	if value == nil {
 		return defaultValue
@@ -48,57 +48,65 @@ func (f *_JsonFileConfProvider) TryGet(key string, defaultValue interface{}) int
 	return value
 }
 
-func (f *_JsonFileConfProvider) Set(key string, value interface{}) error {
+func (p *_JsonFileConfProvider) Set(key string, value interface{}) error {
 	if key == "" {
 		return errors.New("[_JsonFileConfigurationProvider::Set] invalid null argument: key")
 	}
 
-	f.data[key] = value
+	p.data[key] = value
 	return nil
 }
 
-func (f *_JsonFileConfProvider) ContainKey(key string) bool {
+func (p *_JsonFileConfProvider) ContainKey(key string) bool {
 	if key == "" {
 		return false
 	}
 
-	_, exist := f.data[key]
+	_, exist := p.data[key]
 
 	return exist
 }
 
-func (f *_JsonFileConfProvider) Keys() []string {
+func (p *_JsonFileConfProvider) Keys() []string {
 
 	var keys []string
 
-	for k := range f.data {
+	for k := range p.data {
 		keys = append(keys, k)
 	}
 
 	return keys
 }
 
-func (f *_JsonFileConfProvider) Values() []interface{} {
+func (p *_JsonFileConfProvider) Values() []interface{} {
 	var values []interface{}
 
-	for _, v := range f.data {
+	for _, v := range p.data {
 		values = append(values, v)
 	}
 
 	return values
 }
 
-func (f *_JsonFileConfProvider) GetReloadToken() ReloadToken {
-	return f.reloadToken
+func (p *_JsonFileConfProvider) GetSection(key string) ConfSection {
+	return newConfSection(p, key)
 }
 
-func (f *_JsonFileConfProvider) Load() {
+func (p *_JsonFileConfProvider) Reload() {
+	p.Load()
+}
 
-	fileInfo := f.source.GetFileInfo()
+func (p *_JsonFileConfProvider) GetReloadToken() ReloadToken {
+	return p.reloadToken
+}
+
+func (p *_JsonFileConfProvider) Load() {
+
+	fileInfo := p.source.GetFileInfo()
 
 	if fileInfo.Exists() == false {
-		f.data = make(map[string]interface{})
-		f.OnReload()
+		p.data = make(map[string]interface{})
+		p.OnReload()
 		return
 	}
 
@@ -109,18 +117,18 @@ func (f *_JsonFileConfProvider) Load() {
 		return
 	}
 
-	f.LoadFromStream(stream)
-	f.OnReload()
+	p.LoadFromStream(stream)
+	p.OnReload()
 }
 
-func (f *_JsonFileConfProvider) OnReload() {
-	prevToken := f.reloadToken
-	f.reloadToken = NewReloadToken()
+func (p *_JsonFileConfProvider) OnReload() {
+	prevToken := p.reloadToken
+	p.reloadToken = NewReloadToken()
 
 	prevToken.OnReload()
 }
 
-func (f *_JsonFileConfProvider) LoadFromStream(stream []byte) error {
+func (p *_JsonFileConfProvider) LoadFromStream(stream []byte) error {
 	if stream == nil || len(stream) == 0 {
 		return nil
 	}
@@ -133,7 +141,7 @@ func (f *_JsonFileConfProvider) LoadFromStream(stream []byte) error {
 	}
 
 	data := parser.GetDataMap()
-	f.data = data
+	p.data = data
 
 	return nil
 }
@@ -151,22 +159,22 @@ func NewJsonFileConfSource(path string, endureIfNotExist bool, reloadOnChange bo
 		reloadOnChange:   reloadOnChange,
 	}
 }
-func (f *_JsonFileConfSource) Build(builder ConfBuilder) ConfProvider {
-	return newJsonFileConfProvider(f)
+func (s *_JsonFileConfSource) Build(builder ConfBuilder) ConfProvider {
+	return newJsonFileConfProvider(s)
 }
 
-func (f *_JsonFileConfSource) GetFileInfo() FileInfo {
-	return NewFileInfo(f.path)
+func (s *_JsonFileConfSource) GetFileInfo() FileInfo {
+	return NewFileInfo(s.path)
 }
 
-func (f *_JsonFileConfSource) GetPath() string {
-	return f.path
+func (s *_JsonFileConfSource) GetPath() string {
+	return s.path
 }
 
-func (f *_JsonFileConfSource) EndureIfNotExist() bool {
-	return f.endureIfNotExist
+func (s *_JsonFileConfSource) EndureIfNotExist() bool {
+	return s.endureIfNotExist
 }
 
-func (f *_JsonFileConfSource) ReloadOnChange() bool {
-	return f.reloadOnChange
+func (s *_JsonFileConfSource) ReloadOnChange() bool {
+	return s.reloadOnChange
 }

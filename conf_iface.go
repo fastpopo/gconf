@@ -7,6 +7,7 @@ type Conf interface {
 	ContainKey(key string) bool
 	Keys() []string
 	Values() []interface{}
+	GetSection(key string) ConfSection
 }
 
 type ConfBuilder interface {
@@ -27,7 +28,7 @@ type ConfSection interface {
 }
 
 type ConfProvider interface {
-	Conf
+	ConfRoot
 	GetReloadToken() ReloadToken
 	Load()
 	OnReload()

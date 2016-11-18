@@ -87,6 +87,14 @@ func (p *_YamlFileConfProvider) Values() []interface{} {
 	return values
 }
 
+func (p *_YamlFileConfProvider) GetSection(key string) ConfSection {
+	return newConfSection(p, key)
+}
+
+func (p *_YamlFileConfProvider) Reload() {
+	p.Load()
+}
+
 func (p *_YamlFileConfProvider) GetReloadToken() ReloadToken {
 	return p.reloadToken
 }
