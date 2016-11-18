@@ -29,6 +29,16 @@ To install it, run:
 Example
 -------
 
+Sample input:
+
+```Json
+{
+    "key" : "value"
+}
+```
+
+Source:
+
 ```Go
 package main
 
@@ -52,12 +62,16 @@ func main() {
 
 ```
 
+Ths example will generate the following output:
+
+     Key: [key], Value: [value]
+
 Test
 ----
 
      $ go test
 
-This example will generate the following output:
+This test will generate the following output:
 
      Testing with test/sample.json
      PASS
