@@ -7,6 +7,7 @@ import (
 type _MemConfProvider struct {
 	data        map[string]interface{}
 	source      ConfSource
+	converter   *TypeConverter
 	reloadToken ReloadToken
 	prefix      string
 }
@@ -17,8 +18,65 @@ func newMemConfProvider(source ConfSource) ConfProvider {
 		reloadToken: NewReloadToken(),
 	}
 
+	p.converter = NewTypeConverter(p)
 	p.Load()
 	return p
+}
+
+func (p *_MemConfProvider) GetInt(key string) (int, error) {
+	return p.converter.GetInt(key)
+}
+
+func (p *_MemConfProvider) GetInt64(key string) (int64, error) {
+	return p.converter.GetInt64(key)
+}
+
+func (p *_MemConfProvider) GetFloat32(key string) (float32, error) {
+	return p.converter.GetFloat32(key)
+}
+
+func (p *_MemConfProvider) GetFloat64(key string) (float64, error) {
+	return p.converter.GetFloat64(key)
+}
+
+func (p *_MemConfProvider) GetByte(key string) (byte, error) {
+	return p.converter.GetByte(key)
+}
+
+func (p *_MemConfProvider) GetBoolean(key string) (bool, error) {
+	return p.converter.GetBoolean(key)
+}
+
+func (p *_MemConfProvider) GetString(key string) (string, error) {
+	return p.converter.GetString(key)
+}
+
+func (p *_MemConfProvider) TryGetInt(key string, defaultValue int) int {
+	return p.converter.TryGetInt(key, defaultValue)
+}
+
+func (p *_MemConfProvider) TryGetInt64(key string, defaultValue int64) int64 {
+	return p.converter.TryGetInt64(key, defaultValue)
+}
+
+func (p *_MemConfProvider) TryGetFloat32(key string, defaultValue float32) float32 {
+	return p.converter.TryGetFloat32(key, defaultValue)
+}
+
+func (p *_MemConfProvider) TryGetFloat64(key string, defaultValue float64) float64 {
+	return p.converter.TryGetFloat64(key, defaultValue)
+}
+
+func (p *_MemConfProvider) TryGetByte(key string, defaultValue byte) byte {
+	return p.converter.TryGetByte(key, defaultValue)
+}
+
+func (p *_MemConfProvider) TryGetBoolean(key string, defaultValue bool) bool {
+	return p.converter.TryGetBoolean(key, defaultValue)
+}
+
+func (p *_MemConfProvider) TryGetString(key string, defaultValue string) string {
+	return p.converter.TryGetString(key, defaultValue)
 }
 
 func (p *_MemConfProvider) Get(key string) interface{} {

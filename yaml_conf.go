@@ -9,6 +9,7 @@ import (
 type _YamlFileConfProvider struct {
 	data        map[string]interface{}
 	source      FileConfSource
+	converter   *TypeConverter
 	reloadToken ReloadToken
 }
 
@@ -18,9 +19,66 @@ func newYamlFileConfProvider(source FileConfSource) FileConfProvider {
 		reloadToken: NewReloadToken(),
 	}
 
+	p.converter = NewTypeConverter(p)
 	p.Load()
 
 	return p
+}
+
+func (p *_YamlFileConfProvider) GetInt(key string) (int, error) {
+	return p.converter.GetInt(key)
+}
+
+func (p *_YamlFileConfProvider) GetInt64(key string) (int64, error) {
+	return p.converter.GetInt64(key)
+}
+
+func (p *_YamlFileConfProvider) GetFloat32(key string) (float32, error) {
+	return p.converter.GetFloat32(key)
+}
+
+func (p *_YamlFileConfProvider) GetFloat64(key string) (float64, error) {
+	return p.converter.GetFloat64(key)
+}
+
+func (p *_YamlFileConfProvider) GetByte(key string) (byte, error) {
+	return p.converter.GetByte(key)
+}
+
+func (p *_YamlFileConfProvider) GetBoolean(key string) (bool, error) {
+	return p.converter.GetBoolean(key)
+}
+
+func (p *_YamlFileConfProvider) GetString(key string) (string, error) {
+	return p.converter.GetString(key)
+}
+
+func (p *_YamlFileConfProvider) TryGetInt(key string, defaultValue int) int {
+	return p.converter.TryGetInt(key, defaultValue)
+}
+
+func (p *_YamlFileConfProvider) TryGetInt64(key string, defaultValue int64) int64 {
+	return p.converter.TryGetInt64(key, defaultValue)
+}
+
+func (p *_YamlFileConfProvider) TryGetFloat32(key string, defaultValue float32) float32 {
+	return p.converter.TryGetFloat32(key, defaultValue)
+}
+
+func (p *_YamlFileConfProvider) TryGetFloat64(key string, defaultValue float64) float64 {
+	return p.converter.TryGetFloat64(key, defaultValue)
+}
+
+func (p *_YamlFileConfProvider) TryGetByte(key string, defaultValue byte) byte {
+	return p.converter.TryGetByte(key, defaultValue)
+}
+
+func (p *_YamlFileConfProvider) TryGetBoolean(key string, defaultValue bool) bool {
+	return p.converter.TryGetBoolean(key, defaultValue)
+}
+
+func (p *_YamlFileConfProvider) TryGetString(key string, defaultValue string) string {
+	return p.converter.TryGetString(key, defaultValue)
 }
 
 func (p *_YamlFileConfProvider) Get(key string) interface{} {

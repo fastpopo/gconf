@@ -10,6 +10,7 @@ import (
 type _JsonFileConfProvider struct {
 	data        map[string]interface{}
 	source      FileConfSource
+	converter   *TypeConverter
 	reloadToken ReloadToken
 }
 
@@ -19,9 +20,66 @@ func newJsonFileConfProvider(source FileConfSource) FileConfProvider {
 		reloadToken: NewReloadToken(),
 	}
 
+	p.converter = NewTypeConverter(p)
 	p.Load()
 
 	return p
+}
+
+func (p *_JsonFileConfProvider) GetInt(key string) (int, error) {
+	return p.converter.GetInt(key)
+}
+
+func (p *_JsonFileConfProvider) GetInt64(key string) (int64, error) {
+	return p.converter.GetInt64(key)
+}
+
+func (p *_JsonFileConfProvider) GetFloat32(key string) (float32, error) {
+	return p.converter.GetFloat32(key)
+}
+
+func (p *_JsonFileConfProvider) GetFloat64(key string) (float64, error) {
+	return p.converter.GetFloat64(key)
+}
+
+func (p *_JsonFileConfProvider) GetByte(key string) (byte, error) {
+	return p.converter.GetByte(key)
+}
+
+func (p *_JsonFileConfProvider) GetBoolean(key string) (bool, error) {
+	return p.converter.GetBoolean(key)
+}
+
+func (p *_JsonFileConfProvider) GetString(key string) (string, error) {
+	return p.converter.GetString(key)
+}
+
+func (p *_JsonFileConfProvider) TryGetInt(key string, defaultValue int) int {
+	return p.converter.TryGetInt(key, defaultValue)
+}
+
+func (p *_JsonFileConfProvider) TryGetInt64(key string, defaultValue int64) int64 {
+	return p.converter.TryGetInt64(key, defaultValue)
+}
+
+func (p *_JsonFileConfProvider) TryGetFloat32(key string, defaultValue float32) float32 {
+	return p.converter.TryGetFloat32(key, defaultValue)
+}
+
+func (p *_JsonFileConfProvider) TryGetFloat64(key string, defaultValue float64) float64 {
+	return p.converter.TryGetFloat64(key, defaultValue)
+}
+
+func (p *_JsonFileConfProvider) TryGetByte(key string, defaultValue byte) byte {
+	return p.converter.TryGetByte(key, defaultValue)
+}
+
+func (p *_JsonFileConfProvider) TryGetBoolean(key string, defaultValue bool) bool {
+	return p.converter.TryGetBoolean(key, defaultValue)
+}
+
+func (p *_JsonFileConfProvider) TryGetString(key string, defaultValue string) string {
+	return p.converter.TryGetString(key, defaultValue)
 }
 
 func (p *_JsonFileConfProvider) Get(key string) interface{} {
