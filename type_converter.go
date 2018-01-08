@@ -19,9 +19,9 @@ var (
 	defaultString  string  = ""
 	defaultByte    byte    = 0
 
-	Error_Invalid_Argument error = errors.New("Invalid argument")
-	Error_Cant_Find_Key    error = errors.New("Can't find the key in configurations")
-	Error_Cant_Convert     error = errors.New("Can't convert the type")
+	errorInvalidArgument = errors.New("invalid argument")
+	errorCantFindKey     = errors.New("can't find the key in configurations")
+	errorCantConvert     = errors.New("can't convert the type")
 )
 
 func NewTypeConverter(conf Conf) *TypeConverter {
@@ -32,13 +32,13 @@ func NewTypeConverter(conf Conf) *TypeConverter {
 
 func (t *TypeConverter) GetInt(key string) (int, error) {
 	if key == "" {
-		return defaultInt32, Error_Invalid_Argument
+		return defaultInt32, errorInvalidArgument
 	}
 
 	i := t.conf.Get(key)
 
 	if i == nil {
-		return defaultInt32, Error_Cant_Find_Key
+		return defaultInt32, errorCantFindKey
 	}
 
 	v := reflect.ValueOf(i)
@@ -62,12 +62,12 @@ func (t *TypeConverter) GetInt(key string) (int, error) {
 		return t.stringToInt32(v.String())
 	}
 
-	return defaultInt32, Error_Cant_Convert
+	return defaultInt32, errorCantConvert
 }
 
 func (t *TypeConverter) stringToInt32(val string) (int, error) {
 	if val == "" {
-		return defaultInt32, Error_Invalid_Argument
+		return defaultInt32, errorInvalidArgument
 	}
 
 	return strconv.Atoi(val)
@@ -75,13 +75,13 @@ func (t *TypeConverter) stringToInt32(val string) (int, error) {
 
 func (t *TypeConverter) GetInt64(key string) (int64, error) {
 	if key == "" {
-		return defaultInt64, Error_Invalid_Argument
+		return defaultInt64, errorInvalidArgument
 	}
 
 	i := t.conf.Get(key)
 
 	if i == nil {
-		return defaultInt64, Error_Cant_Find_Key
+		return defaultInt64, errorCantFindKey
 	}
 
 	v := reflect.ValueOf(i)
@@ -105,12 +105,12 @@ func (t *TypeConverter) GetInt64(key string) (int64, error) {
 		return t.stringToInt64(v.String())
 	}
 
-	return defaultInt64, Error_Cant_Convert
+	return defaultInt64, errorCantConvert
 }
 
 func (t *TypeConverter) stringToInt64(val string) (int64, error) {
 	if val == "" {
-		return defaultInt64, Error_Invalid_Argument
+		return defaultInt64, errorInvalidArgument
 	}
 
 	return strconv.ParseInt(val, 10, 64)
@@ -118,13 +118,13 @@ func (t *TypeConverter) stringToInt64(val string) (int64, error) {
 
 func (t *TypeConverter) GetFloat32(key string) (float32, error) {
 	if key == "" {
-		return defaultFloat32, Error_Invalid_Argument
+		return defaultFloat32, errorInvalidArgument
 	}
 
 	i := t.conf.Get(key)
 
 	if i == nil {
-		return defaultFloat32, Error_Cant_Find_Key
+		return defaultFloat32, errorCantFindKey
 	}
 
 	v := reflect.ValueOf(i)
@@ -138,12 +138,12 @@ func (t *TypeConverter) GetFloat32(key string) (float32, error) {
 		return t.stringToFloat32(v.String())
 	}
 
-	return defaultFloat32, Error_Cant_Convert
+	return defaultFloat32, errorCantConvert
 }
 
 func (t *TypeConverter) stringToFloat32(val string) (float32, error) {
 	if val == "" {
-		return defaultFloat32, Error_Invalid_Argument
+		return defaultFloat32, errorInvalidArgument
 	}
 
 	v, err := strconv.ParseFloat(val, 32)
@@ -157,13 +157,13 @@ func (t *TypeConverter) stringToFloat32(val string) (float32, error) {
 
 func (t *TypeConverter) GetFloat64(key string) (float64, error) {
 	if key == "" {
-		return defaultFloat64, Error_Invalid_Argument
+		return defaultFloat64, errorInvalidArgument
 	}
 
 	i := t.conf.Get(key)
 
 	if i == nil {
-		return defaultFloat64, Error_Cant_Find_Key
+		return defaultFloat64, errorCantFindKey
 	}
 
 	v := reflect.ValueOf(i)
@@ -177,12 +177,12 @@ func (t *TypeConverter) GetFloat64(key string) (float64, error) {
 		return t.stringToFloat64(v.String())
 	}
 
-	return defaultFloat64, Error_Cant_Convert
+	return defaultFloat64, errorCantConvert
 }
 
 func (t *TypeConverter) stringToFloat64(val string) (float64, error) {
 	if val == "" {
-		return defaultFloat64, Error_Invalid_Argument
+		return defaultFloat64, errorInvalidArgument
 	}
 
 	return strconv.ParseFloat(val, 64)
@@ -190,13 +190,13 @@ func (t *TypeConverter) stringToFloat64(val string) (float64, error) {
 
 func (t *TypeConverter) GetByte(key string) (byte, error) {
 	if key == "" {
-		return defaultByte, Error_Invalid_Argument
+		return defaultByte, errorInvalidArgument
 	}
 
 	i := t.conf.Get(key)
 
 	if i == nil {
-		return defaultByte, Error_Cant_Find_Key
+		return defaultByte, errorCantFindKey
 	}
 
 	v := reflect.ValueOf(i)
@@ -220,12 +220,12 @@ func (t *TypeConverter) GetByte(key string) (byte, error) {
 		return t.stringToByte(v.String())
 	}
 
-	return defaultByte, Error_Cant_Convert
+	return defaultByte, errorCantConvert
 }
 
 func (t *TypeConverter) stringToByte(val string) (byte, error) {
 	if val == "" {
-		return defaultByte, Error_Invalid_Argument
+		return defaultByte, errorInvalidArgument
 	}
 
 	v, err := strconv.ParseInt(val, 10, 8)
@@ -239,13 +239,13 @@ func (t *TypeConverter) stringToByte(val string) (byte, error) {
 
 func (t *TypeConverter) GetBoolean(key string) (bool, error) {
 	if key == "" {
-		return defaultBool, Error_Invalid_Argument
+		return defaultBool, errorInvalidArgument
 	}
 
 	i := t.conf.Get(key)
 
 	if i == nil {
-		return defaultBool, Error_Cant_Find_Key
+		return defaultBool, errorCantFindKey
 	}
 
 	v := reflect.ValueOf(i)
@@ -257,12 +257,12 @@ func (t *TypeConverter) GetBoolean(key string) (bool, error) {
 		return t.stringToBoolean(v.String())
 	}
 
-	return defaultBool, Error_Cant_Convert
+	return defaultBool, errorCantConvert
 }
 
 func (t *TypeConverter) stringToBoolean(val string) (bool, error) {
 	if val == "" {
-		return defaultBool, Error_Invalid_Argument
+		return defaultBool, errorInvalidArgument
 	}
 
 	return strconv.ParseBool(val)
@@ -270,13 +270,13 @@ func (t *TypeConverter) stringToBoolean(val string) (bool, error) {
 
 func (t *TypeConverter) GetString(key string) (string, error) {
 	if key == "" {
-		return defaultString, Error_Invalid_Argument
+		return defaultString, errorInvalidArgument
 	}
 
 	i := t.conf.Get(key)
 
 	if i == nil {
-		return defaultString, Error_Cant_Find_Key
+		return defaultString, errorCantFindKey
 	}
 
 	v := reflect.ValueOf(i)
@@ -286,7 +286,7 @@ func (t *TypeConverter) GetString(key string) (string, error) {
 		return v.String(), nil
 	}
 
-	return defaultString, Error_Cant_Convert
+	return defaultString, errorCantConvert
 }
 
 func (t *TypeConverter) TryGetInt(key string, defaultValue int) int {
