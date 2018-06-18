@@ -3,7 +3,7 @@ package gconf
 import "strings"
 
 const (
-	KeyDelimiter string = ":"
+	KeyDelimiter string = "/"
 	RootPath     string = ""
 )
 
@@ -45,4 +45,28 @@ func GetParentPath(path string) string {
 
 func HasPathInKey(path, key string) bool {
 	return strings.HasPrefix(strings.ToLower(key), strings.ToLower(path))
+}
+
+func GetPaths(key string) []string {
+	return strings.Split(key, KeyDelimiter)
+}
+
+func FindChildKeys(basePath string, keys []string) []string {
+	if keys == nil || len(keys) == 0 {
+		return nil
+	}
+
+	if basePath == RootPath {
+		return keys
+	}
+
+	var subKeys []string
+
+	for _, k := range keys {
+		if HasPathInKey(basePath, k) {
+			subKeys = append(subKeys, k)
+		}
+	}
+
+	return subKeys
 }

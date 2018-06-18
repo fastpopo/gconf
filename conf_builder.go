@@ -1,14 +1,14 @@
 package gconf
 
-type _ConfigurationBuilder struct {
+type configurationBuilder struct {
 	sources []ConfSource
 }
 
 func NewConfBuilder() ConfBuilder {
-	return &_ConfigurationBuilder{}
+	return &configurationBuilder{}
 }
 
-func (c *_ConfigurationBuilder) Add(source ConfSource) ConfBuilder {
+func (c *configurationBuilder) Add(source ConfSource) ConfBuilder {
 	if source == nil {
 		return c
 	}
@@ -17,11 +17,11 @@ func (c *_ConfigurationBuilder) Add(source ConfSource) ConfBuilder {
 	return c
 }
 
-func (c *_ConfigurationBuilder) GetSources() []ConfSource {
+func (c *configurationBuilder) GetSources() []ConfSource {
 	return c.sources
 }
 
-func (c *_ConfigurationBuilder) Build() ConfRoot {
+func (c *configurationBuilder) Build() ConfRoot {
 
 	var providers []ConfProvider
 

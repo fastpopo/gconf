@@ -4,5 +4,4 @@
 *.test
 *.prof
 *.exe
-vendor/
 *~

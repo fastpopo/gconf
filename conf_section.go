@@ -4,23 +4,23 @@ import (
 	"log"
 )
 
-type _ConfSection struct {
-	root      ConfRoot
-	converter *TypeConverter
+type confSection struct {
 	path      string
 	key       string
+	root      ConfRoot
+	converter TypeConverter
 }
 
-func newConfSection(root ConfRoot, path string) ConfSection {
+func NewConfSection(root ConfRoot, path string) ConfSection {
 	if root == nil {
-		log.Fatal("[_ConfigurationSection::NewConfigurationSection] invalid null argument: root")
+		log.Fatal("[confSection::NewConfSection] invalid null argument: root")
 	}
 
 	if path == "" {
-		log.Fatal("[_ConfigurationSection::NewConfigurationSection] invalid empty string argument: path")
+		log.Fatal("[confSection::NewConfSection] invalid empty string argument: path")
 	}
 
-	s := &_ConfSection{
+	s := &confSection{
 		root: root,
 		path: path,
 	}
@@ -29,88 +29,28 @@ func newConfSection(root ConfRoot, path string) ConfSection {
 	return s
 }
 
-func (c *_ConfSection) GetInt(key string) (int, error) {
-	return c.root.GetInt(PathCombine(c.path, key))
-}
-
-func (c *_ConfSection) GetInt64(key string) (int64, error) {
-	return c.root.GetInt64(PathCombine(c.path, key))
-}
-
-func (c *_ConfSection) GetFloat32(key string) (float32, error) {
-	return c.root.GetFloat32(PathCombine(c.path, key))
-}
-
-func (c *_ConfSection) GetFloat64(key string) (float64, error) {
-	return c.root.GetFloat64(PathCombine(c.path, key))
-}
-
-func (c *_ConfSection) GetByte(key string) (byte, error) {
-	return c.root.GetByte(PathCombine(c.path, key))
-}
-
-func (c *_ConfSection) GetBoolean(key string) (bool, error) {
-	return c.root.GetBoolean(PathCombine(c.path, key))
-}
-
-func (c *_ConfSection) GetString(key string) (string, error) {
-	return c.root.GetString(PathCombine(c.path, key))
-}
-
-func (c *_ConfSection) TryGetInt(key string, defaultValue int) int {
-	return c.root.TryGetInt(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) TryGetInt64(key string, defaultValue int64) int64 {
-	return c.root.TryGetInt64(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) TryGetFloat32(key string, defaultValue float32) float32 {
-	return c.root.TryGetFloat32(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) TryGetFloat64(key string, defaultValue float64) float64 {
-	return c.root.TryGetFloat64(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) TryGetByte(key string, defaultValue byte) byte {
-	return c.root.TryGetByte(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) TryGetBoolean(key string, defaultValue bool) bool {
-	return c.root.TryGetBoolean(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) TryGetString(key string, defaultValue string) string {
-	return c.root.TryGetString(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) Get(key string) interface{} {
+func (c *confSection) Get(key string) interface{} {
 	return c.root.Get(PathCombine(c.path, key))
 }
 
-func (c *_ConfSection) TryGet(key string, defaultValue interface{}) interface{} {
-	return c.root.TryGet(PathCombine(c.path, key), defaultValue)
-}
-
-func (c *_ConfSection) Set(key string, value interface{}) error {
+func (c *confSection) Set(key string, value interface{}) error {
 	return c.root.Set(PathCombine(c.path, key), value)
 }
 
-func (c *_ConfSection) ContainKey(key string) bool {
+func (c *confSection) ContainKey(key string) bool {
 	return c.root.ContainKey(PathCombine(c.path, key))
 }
 
-func (c *_ConfSection) Keys() []string {
+func (c *confSection) Keys() []string {
 
-	allkeys := c.root.Keys()
-	if allkeys == nil || len(allkeys) == 0 {
+	allKeys := c.root.Keys()
+	if allKeys == nil || len(allKeys) == 0 {
 		return nil
 	}
 
 	var newKeys []string
 
-	for _, k := range allkeys {
+	for _, k := range allKeys {
 		if HasPathInKey(c.path, k) == true {
 			newKeys = append(newKeys, k)
 		}
@@ -119,30 +59,158 @@ func (c *_ConfSection) Keys() []string {
 	return newKeys
 }
 
-func (c *_ConfSection) Values() []interface{} {
-	keys := c.Keys()
+func (c *confSection) Values() []interface{} {
+	pairs := c.root.ToArray()
 
-	if keys == nil || len(keys) == 0 {
+	if pairs == nil || len(pairs) == 0 {
 		return nil
 	}
 
 	var values []interface{}
 
-	for _, k := range keys {
-		values = append(values, c.root.Get(k))
+	for _, p := range pairs {
+		if HasPathInKey(c.path, p.Key) == true {
+			values = append(values, p.Value)
+		}
 	}
 
 	return values
 }
 
-func (c *_ConfSection) GetSection(key string) ConfSection {
+func (c *confSection) ToArray() []KeyValuePair {
+	pairs := c.root.ToArray()
+
+	if pairs == nil || len(pairs) == 0 {
+		return nil
+	}
+
+	var values []KeyValuePair
+
+	for _, p := range pairs {
+		if HasPathInKey(c.path, p.Key) == true {
+			values = append(values, p)
+		}
+	}
+
+	return values
+}
+
+func (c *confSection) IsEmpty() bool {
+	pairs := c.root.ToArray()
+
+	if pairs == nil || len(pairs) == 0 {
+		return true
+	}
+
+	for _, p := range pairs {
+		if HasPathInKey(c.path, p.Key) == true {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (c *confSection) GetInt(key string) (int, error) {
+	return c.root.GetInt(PathCombine(c.path, key))
+}
+
+func (c *confSection) GetInt64(key string) (int64, error) {
+	return c.root.GetInt64(PathCombine(c.path, key))
+}
+
+func (c *confSection) GetUint(key string) (uint, error) {
+	return c.converter.GetUint(key)
+}
+
+func (c *confSection) GetUint64(key string) (uint64, error) {
+	return c.converter.GetUint64(key)
+}
+
+func (c *confSection) GetFloat32(key string) (float32, error) {
+	return c.root.GetFloat32(PathCombine(c.path, key))
+}
+
+func (c *confSection) GetFloat64(key string) (float64, error) {
+	return c.root.GetFloat64(PathCombine(c.path, key))
+}
+
+func (c *confSection) GetByte(key string) (byte, error) {
+	return c.root.GetByte(PathCombine(c.path, key))
+}
+
+func (c *confSection) GetBoolean(key string) (bool, error) {
+	return c.root.GetBoolean(PathCombine(c.path, key))
+}
+
+func (c *confSection) GetComplex64(key string) (complex64, error) {
+	return c.converter.GetComplex64(key)
+}
+
+func (c *confSection) GetComplex128(key string) (complex128, error) {
+	return c.converter.GetComplex128(key)
+}
+
+func (c *confSection) GetString(key string) (string, error) {
+	return c.root.GetString(PathCombine(c.path, key))
+}
+
+func (c *confSection) TryGet(key string, defaultValue interface{}) interface{} {
+	return c.root.TryGet(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) TryGetInt(key string, defaultValue int) int {
+	return c.root.TryGetInt(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) TryGetInt64(key string, defaultValue int64) int64 {
+	return c.root.TryGetInt64(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) TryGetUint(key string, defaultValue uint) uint {
+	return c.converter.TryGetUint(key, defaultValue)
+}
+
+func (c *confSection) TryGetUint64(key string, defaultValue uint64) uint64 {
+	return c.converter.TryGetUint64(key, defaultValue)
+}
+
+func (c *confSection) TryGetFloat32(key string, defaultValue float32) float32 {
+	return c.root.TryGetFloat32(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) TryGetFloat64(key string, defaultValue float64) float64 {
+	return c.root.TryGetFloat64(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) TryGetByte(key string, defaultValue byte) byte {
+	return c.root.TryGetByte(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) TryGetBoolean(key string, defaultValue bool) bool {
+	return c.root.TryGetBoolean(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) TryGetComplex64(key string, defaultValue complex64) complex64 {
+	return c.converter.TryGetComplex64(key, defaultValue)
+}
+
+func (c *confSection) TryGetComplex128(key string, defaultValue complex128) complex128 {
+	return c.converter.TryGetComplex128(key, defaultValue)
+}
+
+func (c *confSection) TryGetString(key string, defaultValue string) string {
+	return c.root.TryGetString(PathCombine(c.path, key), defaultValue)
+}
+
+func (c *confSection) GetSection(key string) ConfSection {
 	return c.root.GetSection(PathCombine(c.path, key))
 }
 
-func (c *_ConfSection) GetKey() string {
+func (c *confSection) GetSectionKey() string {
 	return GetSectionKey(c.path)
 }
 
-func (c *_ConfSection) GetPath() string {
+func (c *confSection) GetSectionPath() string {
 	return c.path
 }

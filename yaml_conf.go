@@ -1,237 +1,137 @@
 package gconf
 
 import (
+	"fmt"
 	"errors"
-	"github.com/fastpopo/gconf/yamlconf"
-	"log"
+	"reflect"
+
+	"gopkg.in/yaml.v2"
 )
 
-type _YamlFileConfProvider struct {
-	data        map[string]interface{}
-	source      FileConfSource
-	converter   *TypeConverter
-	reloadToken ReloadToken
+type YamlConfSource struct {
+	yamlMessage []byte
 }
 
-func newYamlFileConfProvider(source FileConfSource) FileConfProvider {
-	p := &_YamlFileConfProvider{
-		source:      source,
-		reloadToken: NewReloadToken(),
+func NewYamlConfSource(yamlMessage []byte) *YamlConfSource {
+	return &YamlConfSource{
+		yamlMessage: yamlMessage,
 	}
-
-	p.converter = NewTypeConverter(p)
-	p.Load()
-
-	return p
 }
 
-func (p *_YamlFileConfProvider) GetInt(key string) (int, error) {
-	return p.converter.GetInt(key)
+func (s *YamlConfSource) Build(builder ConfBuilder) ConfProvider {
+	return NewConfProvider(s)
 }
 
-func (p *_YamlFileConfProvider) GetInt64(key string) (int64, error) {
-	return p.converter.GetInt64(key)
-}
-
-func (p *_YamlFileConfProvider) GetFloat32(key string) (float32, error) {
-	return p.converter.GetFloat32(key)
-}
-
-func (p *_YamlFileConfProvider) GetFloat64(key string) (float64, error) {
-	return p.converter.GetFloat64(key)
-}
-
-func (p *_YamlFileConfProvider) GetByte(key string) (byte, error) {
-	return p.converter.GetByte(key)
-}
-
-func (p *_YamlFileConfProvider) GetBoolean(key string) (bool, error) {
-	return p.converter.GetBoolean(key)
-}
-
-func (p *_YamlFileConfProvider) GetString(key string) (string, error) {
-	return p.converter.GetString(key)
-}
-
-func (p *_YamlFileConfProvider) TryGetInt(key string, defaultValue int) int {
-	return p.converter.TryGetInt(key, defaultValue)
-}
-
-func (p *_YamlFileConfProvider) TryGetInt64(key string, defaultValue int64) int64 {
-	return p.converter.TryGetInt64(key, defaultValue)
-}
-
-func (p *_YamlFileConfProvider) TryGetFloat32(key string, defaultValue float32) float32 {
-	return p.converter.TryGetFloat32(key, defaultValue)
-}
-
-func (p *_YamlFileConfProvider) TryGetFloat64(key string, defaultValue float64) float64 {
-	return p.converter.TryGetFloat64(key, defaultValue)
-}
-
-func (p *_YamlFileConfProvider) TryGetByte(key string, defaultValue byte) byte {
-	return p.converter.TryGetByte(key, defaultValue)
-}
-
-func (p *_YamlFileConfProvider) TryGetBoolean(key string, defaultValue bool) bool {
-	return p.converter.TryGetBoolean(key, defaultValue)
-}
-
-func (p *_YamlFileConfProvider) TryGetString(key string, defaultValue string) string {
-	return p.converter.TryGetString(key, defaultValue)
-}
-
-func (p *_YamlFileConfProvider) Get(key string) interface{} {
-	if key == "" {
-		return nil
-	}
-
-	value, exist := p.data[key]
-
-	if exist == false {
-		return nil
-	}
-
-	return value
-}
-
-func (p *_YamlFileConfProvider) TryGet(key string, defaultValue interface{}) interface{} {
-	value := p.Get(key)
-
-	if value == nil {
-		return defaultValue
-	}
-
-	return value
-}
-
-func (p *_YamlFileConfProvider) Set(key string, value interface{}) error {
-	if key == "" {
-		return errors.New("[_YamlFileConfProvider::Set] invalid null argument: key")
-	}
-
-	p.data[key] = value
-	return nil
-}
-
-func (p *_YamlFileConfProvider) ContainKey(key string) bool {
-	if key == "" {
-		return false
-	}
-
-	_, exist := p.data[key]
-
-	return exist
-}
-
-func (p *_YamlFileConfProvider) Keys() []string {
-
-	var keys []string
-
-	for k := range p.data {
-		keys = append(keys, k)
-	}
-
-	return keys
-}
-
-func (p *_YamlFileConfProvider) Values() []interface{} {
-	var values []interface{}
-
-	for _, v := range p.data {
-		values = append(values, v)
-	}
-
-	return values
-}
-
-func (p *_YamlFileConfProvider) GetSection(key string) ConfSection {
-	return newConfSection(p, key)
-}
-
-func (p *_YamlFileConfProvider) Reload() {
-	p.Load()
-}
-
-func (p *_YamlFileConfProvider) GetReloadToken() ReloadToken {
-	return p.reloadToken
-}
-
-func (p *_YamlFileConfProvider) Load() {
-
-	fileInfo := p.source.GetFileInfo()
-
-	if fileInfo.Exists() == false {
-		p.data = make(map[string]interface{})
-		p.OnReload()
-		return
-	}
-
-	stream, err := fileInfo.ReadAll()
+func (s *YamlConfSource) Load() (map[string]interface{}, error) {
+	parser := newYamlConfParser(RootPath, KeyDelimiter)
+	err := parser.Parse(s.yamlMessage)
 
 	if err != nil {
-		log.Print("Can't read the file: ", err)
-		return
+		return nil, err
 	}
 
-	p.LoadFromStream(stream)
-	p.OnReload()
+	return parser.GetDataMap(), nil
 }
 
-func (p *_YamlFileConfProvider) OnReload() {
-	prevToken := p.reloadToken
-	p.reloadToken = NewReloadToken()
 
-	prevToken.OnReload()
+type yamlConfParser struct {
+	dataMap      map[string]interface{}
+	rootPath     string
+	keyDelimiter string
 }
 
-func (p *_YamlFileConfProvider) LoadFromStream(stream []byte) error {
+func newYamlConfParser(rootPath string, keyDelimiter string) *yamlConfParser {
+	return &yamlConfParser{
+		dataMap:      make(map[string]interface{}),
+		rootPath:     rootPath,
+		keyDelimiter: keyDelimiter,
+	}
+}
+
+func (p *yamlConfParser) Parse(stream []byte) error {
 	if stream == nil || len(stream) == 0 {
-		return nil
+		return errors.New("[yamlConfParser::Parse] invalid null argument: stream")
 	}
 
-	parser := yamlconf.NewYamlConfParser(RootPath, KeyDelimiter)
-	err := parser.Parse(stream)
+	var data interface{}
 
-	if err != nil {
+	if err := yaml.Unmarshal(stream, &data); err != nil {
 		return err
 	}
 
-	data := parser.GetDataMap()
-	p.data = data
+	p.parse(data, p.rootPath)
 
 	return nil
 }
 
-type _YamlFileConfSource struct {
-	path             string
-	endureIfNotExist bool
-	reloadOnChange   bool
-}
+func (p *yamlConfParser) parse(value interface{}, path string) {
+	if value == nil {
+		return
+	}
 
-func NewYamlFileConfSource(path string, endureIfNotExist bool, reloadOnChange bool) FileConfSource {
-	return &_YamlFileConfSource{
-		path:             path,
-		endureIfNotExist: endureIfNotExist,
-		reloadOnChange:   reloadOnChange,
+	rv := reflect.ValueOf(value)
+
+	switch rv.Kind() {
+	case reflect.Map:
+		p.parseMap(value, path)
+		break
+	case reflect.Slice:
+		p.parseArray(value, path)
+		break
+	case reflect.Array:
+		p.parseArray(value, path)
+		break
+	default:
+		p.dataMap[path] = value
+		break
 	}
 }
-func (f *_YamlFileConfSource) Build(builder ConfBuilder) ConfProvider {
-	return newYamlFileConfProvider(f)
+
+func (p *yamlConfParser) parseArray(raw interface{}, parentKey string) {
+	if raw == nil {
+		return
+	}
+
+	data, ok := raw.([]interface{})
+
+	if !ok {
+		return
+	}
+
+	var path = parentKey
+
+	if path != "" {
+		path = path + p.keyDelimiter
+	}
+
+	for idx, v := range data {
+		newPath := path + fmt.Sprint(idx)
+		p.parse(v, newPath)
+	}
 }
 
-func (f *_YamlFileConfSource) GetFileInfo() FileInfo {
-	return NewFileInfo(f.path)
+func (p *yamlConfParser) parseMap(raw interface{}, parentKey string) {
+	if raw == nil {
+		return
+	}
+
+	data, ok := raw.(map[interface{}]interface{})
+
+	if !ok {
+		return
+	}
+
+	var path = parentKey
+	if path != "" {
+		path = path + p.keyDelimiter
+	}
+
+	for k, v := range data {
+		newPath := path + fmt.Sprint(k)
+		p.parse(v, newPath)
+	}
 }
 
-func (f *_YamlFileConfSource) GetPath() string {
-	return f.path
-}
-
-func (f *_YamlFileConfSource) EndureIfNotExist() bool {
-	return f.endureIfNotExist
-}
-
-func (f *_YamlFileConfSource) ReloadOnChange() bool {
-	return f.reloadOnChange
+func (p *yamlConfParser) GetDataMap() map[string]interface{} {
+	return p.dataMap
 }

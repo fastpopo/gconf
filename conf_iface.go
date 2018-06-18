@@ -1,31 +1,51 @@
 package gconf
 
-type Conf interface {
-	GetInt(key string) (int, error)
-	GetInt64(key string) (int64, error)
-	GetFloat32(key string) (float32, error)
-	GetFloat64(key string) (float64, error)
-	GetByte(key string) (byte, error)
-	GetBoolean(key string) (bool, error)
-	GetString(key string) (string, error)
-	TryGetInt(key string, defaultValue int) int
-	TryGetInt64(key string, defaultValue int64) int64
-	TryGetFloat32(key string, defaultValue float32) float32
-	TryGetFloat64(key string, defaultValue float64) float64
-	TryGetByte(key string, defaultValue byte) byte
-	TryGetBoolean(key string, defaultValue bool) bool
-	TryGetString(key string, defaultValue string) string
+type KeyValuePair struct {
+	Key   string
+	Value interface{}
+}
+
+type ConfBase interface {
 	Get(key string) interface{}
-	TryGet(key string, defaultValue interface{}) interface{}
 	Set(key string, value interface{}) error
 	ContainKey(key string) bool
 	Keys() []string
 	Values() []interface{}
+	ToArray() []KeyValuePair
+	IsEmpty() bool
+}
+
+type Conf interface {
+	ConfBase
+	GetBoolean(key string) (bool, error)
+	GetByte(key string) (byte, error)
+	GetInt(key string) (int, error)
+	GetInt64(key string) (int64, error)
+	GetUint(key string)  (uint, error)
+	GetUint64(key string)  (uint64, error)
+	GetFloat32(key string) (float32, error)
+	GetFloat64(key string) (float64, error)
+	GetComplex64(key string) (complex64, error)
+	GetComplex128(key string) (complex128, error)
+	GetString(key string) (string, error)
+	TryGet(key string, defaultValue interface{}) interface{}
+	TryGetBoolean(key string, defaultValue bool) bool
+	TryGetByte(key string, defaultValue byte) byte
+	TryGetInt(key string, defaultValue int) int
+	TryGetInt64(key string, defaultValue int64) int64
+	TryGetUint(key string, defaultValue uint) uint
+	TryGetUint64(key string, defaultValue uint64) uint64
+	TryGetFloat32(key string, defaultValue float32) float32
+	TryGetFloat64(key string, defaultValue float64) float64
+	TryGetComplex64(key string, defaultValue complex64) complex64
+	TryGetComplex128(key string, defaultValue complex128) complex128
+	TryGetString(key string, defaultValue string) string
 	GetSection(key string) ConfSection
+	//Unmarshal(key string, out interface{}) error  // to be supported in the future
 }
 
 type ConfBuilder interface {
-	Add(source ConfSource) ConfBuilder
+	Add(confSource ConfSource) ConfBuilder
 	GetSources() []ConfSource
 	Build() ConfRoot
 }
@@ -33,28 +53,42 @@ type ConfBuilder interface {
 type ConfRoot interface {
 	Conf
 	Reload()
+	Dispose()
 }
 
 type ConfSection interface {
 	Conf
-	GetKey() string
-	GetPath() string
+	GetSectionKey() string
+	GetSectionPath() string
+}
+
+type ConfChanges interface {
+	GetNumOfChanges() int
+	GetChanges() []Change
 }
 
 type ConfProvider interface {
-	ConfRoot
-	GetReloadToken() ReloadToken
+	Conf
+	Reload()
+	Dispose()
 	Load()
-	OnReload()
+	GetChangeToken() ChangeToken
 }
 
 type ConfSource interface {
-	Build(builder ConfBuilder) ConfProvider
+	Build(confBuilder ConfBuilder) ConfProvider
+	Load() (map[string]interface{}, error)
 }
 
-type ReloadToken interface {
+type Watcher interface {
+	Watch(reloadToken ChangeToken) error
+	IsWatching() bool
+	Close() error
+}
+
+type ChangeToken interface {
 	SetCallback(callback func())
 	HasChanged() bool
 	SetAsChanged()
-	OnReload()
+	OnChanged()
 }

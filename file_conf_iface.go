@@ -14,20 +14,18 @@ type FileInfo interface {
 	ReadAll() ([]byte, error)
 }
 
-// FileWatcher feature will be support in future.
-type FileWatcher interface {
-	Watch(filter string) ReloadToken
-}
-
 type FileConfSource interface {
 	ConfSource
+	SetEndureIfNotExist(bool) FileConfSource
+	SetOnConfChangedCallback(func(ConfChanges)) FileConfSource
+	GetOnConfChangedCallback() func(ConfChanges)
 	GetFileInfo() FileInfo
-	GetPath() string
-	EndureIfNotExist() bool
-	ReloadOnChange() bool
+	GetFilePath() string
+	IsEndureIfNotExist() bool
+	IsFileExist() bool
 }
 
 type FileConfProvider interface {
 	ConfProvider
-	LoadFromStream(stream []byte) error
+	OnChanged()
 }

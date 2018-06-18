@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-type _FileInfo struct {
+type fileInfo struct {
 	exists       bool
 	physicalPath string
 	fileInfo     os.FileInfo
 }
 
 func NewFileInfo(filePath string) FileInfo {
-	f := &_FileInfo{
+	f := &fileInfo{
 		exists:       false,
 		physicalPath: filePath,
 	}
@@ -30,11 +30,11 @@ func NewFileInfo(filePath string) FileInfo {
 	return f
 }
 
-func (f *_FileInfo) Exists() bool {
+func (f *fileInfo) Exists() bool {
 	return f.exists
 }
 
-func (f *_FileInfo) IsDirectory() bool {
+func (f *fileInfo) IsDirectory() bool {
 	if f.exists == false {
 		return false
 	}
@@ -42,7 +42,7 @@ func (f *_FileInfo) IsDirectory() bool {
 	return f.fileInfo.IsDir()
 }
 
-func (f *_FileInfo) LastModified() time.Time {
+func (f *fileInfo) LastModified() time.Time {
 	if f.exists == false {
 		return time.Time{}
 	}
@@ -50,7 +50,7 @@ func (f *_FileInfo) LastModified() time.Time {
 	return f.fileInfo.ModTime()
 }
 
-func (f *_FileInfo) GetLength() int64 {
+func (f *fileInfo) GetLength() int64 {
 	if f.exists == false {
 		return 0
 	}
@@ -58,7 +58,7 @@ func (f *_FileInfo) GetLength() int64 {
 	return f.fileInfo.Size()
 }
 
-func (f *_FileInfo) GetName() string {
+func (f *fileInfo) GetName() string {
 	if f.exists == false {
 		return ""
 	}
@@ -66,11 +66,11 @@ func (f *_FileInfo) GetName() string {
 	return f.fileInfo.Name()
 }
 
-func (f *_FileInfo) GetPhysicalPath() string {
+func (f *fileInfo) GetPhysicalPath() string {
 	return f.physicalPath
 }
 
-func (f *_FileInfo) ReadAll() ([]byte, error) {
+func (f *fileInfo) ReadAll() ([]byte, error) {
 	if f.exists == false {
 		return nil, errors.New(fmt.Sprintf("the file [%s] is not exist.", f.physicalPath))
 	}
