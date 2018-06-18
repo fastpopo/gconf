@@ -5,3 +5,5 @@
 *.prof
 *.exe
 *~
+vendor/*
+!vendor/vendor.json 
