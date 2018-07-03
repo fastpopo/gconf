@@ -94,14 +94,8 @@ func (p *tomlConfParser) parseArray(raw interface{}, parentKey string) {
 		return
 	}
 
-	var path = parentKey
-
-	if path != "" {
-		path = path + p.keyDelimiter
-	}
-
 	for idx, v := range data {
-		newPath := path + fmt.Sprint(idx)
+		newPath := PathCombine(parentKey, fmt.Sprint(idx))
 		p.parse(v, newPath)
 	}
 }
@@ -118,14 +112,8 @@ func (p *tomlConfParser) parseMap(raw interface{}, parentKey string) {
 		return
 	}
 
-	var path = parentKey
-
-	if path != "" {
-		path = path + p.keyDelimiter
-	}
-
 	for k, v := range data {
-		newPath := path + k
+		newPath := PathCombine(parentKey, k)
 		p.parse(v, newPath)
 	}
 }

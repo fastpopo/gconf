@@ -4,12 +4,17 @@ import "strings"
 
 const (
 	KeyDelimiter string = "/"
-	RootPath     string = ""
+	RootPath     string = "/"
 )
 
 func PathCombine(path ...string) string {
 	if path == nil || len(path) == 0 {
 		return ""
+	}
+
+	if path[0] == RootPath {
+		path = path[1:]
+		return RootPath + strings.Join(path, KeyDelimiter)
 	}
 
 	return strings.Join(path, KeyDelimiter)

@@ -62,9 +62,13 @@ func (p *envConfParser) Parse() {
 		}
 
 		key := strings.Replace(pair[0], p.prefix, "", 1)
-		value := pair[1]
+		key = PathCombine(RootPath, key)
+
+		var value string
 		if len(pair) > 2 {
 			value = p.combineValue(pair[1:])
+		} else {
+			value = pair[1]
 		}
 
 		p.dataMap[key] = value

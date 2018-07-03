@@ -98,14 +98,8 @@ func (p *yamlConfParser) parseArray(raw interface{}, parentKey string) {
 		return
 	}
 
-	var path = parentKey
-
-	if path != "" {
-		path = path + p.keyDelimiter
-	}
-
 	for idx, v := range data {
-		newPath := path + fmt.Sprint(idx)
+		newPath := PathCombine(parentKey, fmt.Sprint(idx))
 		p.parse(v, newPath)
 	}
 }
@@ -121,13 +115,8 @@ func (p *yamlConfParser) parseMap(raw interface{}, parentKey string) {
 		return
 	}
 
-	var path = parentKey
-	if path != "" {
-		path = path + p.keyDelimiter
-	}
-
 	for k, v := range data {
-		newPath := path + fmt.Sprint(k)
+		newPath := PathCombine(parentKey, fmt.Sprint(k))
 		p.parse(v, newPath)
 	}
 }
