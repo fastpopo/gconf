@@ -2,8 +2,8 @@ package gconf
 
 import (
 	"errors"
-	"reflect"
 	"fmt"
+	"reflect"
 
 	"github.com/BurntSushi/toml"
 )
@@ -23,7 +23,7 @@ func (s *TomlConfSource) Build(confBuilder ConfBuilder) ConfProvider {
 }
 
 func (s *TomlConfSource) Load() (map[string]interface{}, error) {
-	parser := newJsonConfParser(RootPath, KeyDelimiter)
+	parser := newJsonConfParser(RootPath, PathDelimiter)
 	err := parser.Parse(s.tomlMessage)
 
 	if err != nil {
@@ -95,7 +95,7 @@ func (p *tomlConfParser) parseArray(raw interface{}, parentKey string) {
 	}
 
 	for idx, v := range data {
-		newPath := PathCombine(parentKey, fmt.Sprint(idx))
+		newPath := PathCombine(parentKey, ArrayDelimiter+ fmt.Sprint(idx))
 		p.parse(v, newPath)
 	}
 }

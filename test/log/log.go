@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"os"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -25,7 +25,7 @@ func main() {
 		Add(prodSrc).
 		Build()
 
-	for _, s := range conf.ToArray() {
+	for _, s := range conf.ToKeyValuePairs() {
 		fmt.Printf("Key: %s, Value: %v\n", s.Key, s.Value)
 	}
 

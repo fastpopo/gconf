@@ -45,7 +45,7 @@ func (s *JsonFileConfSource) Load() (map[string]interface{}, error) {
 		return data, nil
 	}
 
-	parser := newJsonConfParser(RootPath, KeyDelimiter)
+	parser := newJsonConfParser(RootPath, PathDelimiter)
 	err = parser.Parse(stream)
 
 	if err != nil {

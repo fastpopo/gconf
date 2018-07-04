@@ -6,7 +6,6 @@ import (
 
 type confSection struct {
 	path      string
-	key       string
 	root      ConfRoot
 	converter TypeConverter
 }
@@ -29,6 +28,10 @@ func NewConfSection(root ConfRoot, path string) ConfSection {
 	return s
 }
 
+func (c *confSection) GetPath() string {
+	return c.path
+}
+
 func (c *confSection) Get(key string) interface{} {
 	return c.root.Get(PathCombine(c.path, key))
 }
@@ -48,19 +51,11 @@ func (c *confSection) Keys() []string {
 		return nil
 	}
 
-	var newKeys []string
-
-	for _, k := range allKeys {
-		if HasPathInKey(c.path, k) == true {
-			newKeys = append(newKeys, k)
-		}
-	}
-
-	return newKeys
+	return FindChildKeys(c.path, allKeys)
 }
 
 func (c *confSection) Values() []interface{} {
-	pairs := c.root.ToArray()
+	pairs := c.root.ToKeyValuePairs()
 
 	if pairs == nil || len(pairs) == 0 {
 		return nil
@@ -69,7 +64,7 @@ func (c *confSection) Values() []interface{} {
 	var values []interface{}
 
 	for _, p := range pairs {
-		if HasPathInKey(c.path, p.Key) == true {
+		if HasPathInKey(c.path, p.Key) {
 			values = append(values, p.Value)
 		}
 	}
@@ -77,33 +72,25 @@ func (c *confSection) Values() []interface{} {
 	return values
 }
 
-func (c *confSection) ToArray() []KeyValuePair {
-	pairs := c.root.ToArray()
+func (c *confSection) ToKeyValuePairs() []KeyValuePair {
+	pairs := c.root.ToKeyValuePairs()
 
 	if pairs == nil || len(pairs) == 0 {
 		return nil
 	}
 
-	var values []KeyValuePair
-
-	for _, p := range pairs {
-		if HasPathInKey(c.path, p.Key) == true {
-			values = append(values, p)
-		}
-	}
-
-	return values
+	return FindChildPairs(c.path, pairs)
 }
 
 func (c *confSection) IsEmpty() bool {
-	pairs := c.root.ToArray()
+	pairs := c.root.ToKeyValuePairs()
 
 	if pairs == nil || len(pairs) == 0 {
 		return true
 	}
 
 	for _, p := range pairs {
-		if HasPathInKey(c.path, p.Key) == true {
+		if HasPathInKey(c.path, p.Key) {
 			return false
 		}
 	}
@@ -111,12 +98,16 @@ func (c *confSection) IsEmpty() bool {
 	return true
 }
 
+func (c *confSection) IsArray() bool {
+	return IsArrayPath(c.path, c.Keys())
+}
+
 func (c *confSection) GetInt(key string) (int, error) {
-	return c.root.GetInt(PathCombine(c.path, key))
+	return c.converter.GetInt(key)
 }
 
 func (c *confSection) GetInt64(key string) (int64, error) {
-	return c.root.GetInt64(PathCombine(c.path, key))
+	return c.converter.GetInt64(key)
 }
 
 func (c *confSection) GetUint(key string) (uint, error) {
@@ -128,19 +119,19 @@ func (c *confSection) GetUint64(key string) (uint64, error) {
 }
 
 func (c *confSection) GetFloat32(key string) (float32, error) {
-	return c.root.GetFloat32(PathCombine(c.path, key))
+	return c.converter.GetFloat32(key)
 }
 
 func (c *confSection) GetFloat64(key string) (float64, error) {
-	return c.root.GetFloat64(PathCombine(c.path, key))
+	return c.converter.GetFloat64(key)
 }
 
 func (c *confSection) GetByte(key string) (byte, error) {
-	return c.root.GetByte(PathCombine(c.path, key))
+	return c.converter.GetByte(key)
 }
 
 func (c *confSection) GetBoolean(key string) (bool, error) {
-	return c.root.GetBoolean(PathCombine(c.path, key))
+	return c.converter.GetBoolean(key)
 }
 
 func (c *confSection) GetComplex64(key string) (complex64, error) {
@@ -152,7 +143,7 @@ func (c *confSection) GetComplex128(key string) (complex128, error) {
 }
 
 func (c *confSection) GetString(key string) (string, error) {
-	return c.root.GetString(PathCombine(c.path, key))
+	return c.converter.GetString(key)
 }
 
 func (c *confSection) TryGet(key string, defaultValue interface{}) interface{} {
@@ -160,11 +151,11 @@ func (c *confSection) TryGet(key string, defaultValue interface{}) interface{} {
 }
 
 func (c *confSection) TryGetInt(key string, defaultValue int) int {
-	return c.root.TryGetInt(PathCombine(c.path, key), defaultValue)
+	return c.converter.TryGetInt(key, defaultValue)
 }
 
 func (c *confSection) TryGetInt64(key string, defaultValue int64) int64 {
-	return c.root.TryGetInt64(PathCombine(c.path, key), defaultValue)
+	return c.converter.TryGetInt64(key, defaultValue)
 }
 
 func (c *confSection) TryGetUint(key string, defaultValue uint) uint {
@@ -176,19 +167,19 @@ func (c *confSection) TryGetUint64(key string, defaultValue uint64) uint64 {
 }
 
 func (c *confSection) TryGetFloat32(key string, defaultValue float32) float32 {
-	return c.root.TryGetFloat32(PathCombine(c.path, key), defaultValue)
+	return c.converter.TryGetFloat32(key, defaultValue)
 }
 
 func (c *confSection) TryGetFloat64(key string, defaultValue float64) float64 {
-	return c.root.TryGetFloat64(PathCombine(c.path, key), defaultValue)
+	return c.converter.TryGetFloat64(key, defaultValue)
 }
 
 func (c *confSection) TryGetByte(key string, defaultValue byte) byte {
-	return c.root.TryGetByte(PathCombine(c.path, key), defaultValue)
+	return c.converter.TryGetByte(key, defaultValue)
 }
 
 func (c *confSection) TryGetBoolean(key string, defaultValue bool) bool {
-	return c.root.TryGetBoolean(PathCombine(c.path, key), defaultValue)
+	return c.converter.TryGetBoolean(key, defaultValue)
 }
 
 func (c *confSection) TryGetComplex64(key string, defaultValue complex64) complex64 {
@@ -200,17 +191,13 @@ func (c *confSection) TryGetComplex128(key string, defaultValue complex128) comp
 }
 
 func (c *confSection) TryGetString(key string, defaultValue string) string {
-	return c.root.TryGetString(PathCombine(c.path, key), defaultValue)
+	return c.converter.TryGetString(key, defaultValue)
 }
 
 func (c *confSection) GetSection(key string) ConfSection {
 	return c.root.GetSection(PathCombine(c.path, key))
 }
 
-func (c *confSection) GetSectionKey() string {
-	return GetSectionKey(c.path)
-}
-
-func (c *confSection) GetSectionPath() string {
-	return c.path
+func (c *confSection) GetArraySection(key string) ConfArraySection {
+	return c.root.GetArraySection(PathCombine(c.path, key))
 }

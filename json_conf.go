@@ -1,10 +1,10 @@
 package gconf
 
 import (
-	"errors"
 	"encoding/json"
-	"reflect"
+	"errors"
 	"fmt"
+	"reflect"
 )
 
 type JsonConfSource struct {
@@ -22,7 +22,7 @@ func (s *JsonConfSource) Build(confBuilder ConfBuilder) ConfProvider {
 }
 
 func (s *JsonConfSource) Load() (map[string]interface{}, error) {
-	parser := newJsonConfParser(RootPath, KeyDelimiter)
+	parser := newJsonConfParser(RootPath, PathDelimiter)
 	err := parser.Parse(s.jsonMessage)
 
 	if err != nil {
@@ -94,7 +94,7 @@ func (p *jsonConfParser) parseArray(raw interface{}, parentKey string) {
 	}
 
 	for idx, v := range data {
-		newPath := PathCombine(parentKey, fmt.Sprint(idx))
+		newPath := PathCombine(parentKey, ArrayDelimiter+ fmt.Sprint(idx))
 		p.parse(v, newPath)
 	}
 }

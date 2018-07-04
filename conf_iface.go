@@ -6,13 +6,15 @@ type KeyValuePair struct {
 }
 
 type ConfBase interface {
+	GetPath() string
 	Get(key string) interface{}
 	Set(key string, value interface{}) error
 	ContainKey(key string) bool
 	Keys() []string
 	Values() []interface{}
-	ToArray() []KeyValuePair
+	ToKeyValuePairs() []KeyValuePair
 	IsEmpty() bool
+	IsArray() bool
 }
 
 type Conf interface {
@@ -21,8 +23,8 @@ type Conf interface {
 	GetByte(key string) (byte, error)
 	GetInt(key string) (int, error)
 	GetInt64(key string) (int64, error)
-	GetUint(key string)  (uint, error)
-	GetUint64(key string)  (uint64, error)
+	GetUint(key string) (uint, error)
+	GetUint64(key string) (uint64, error)
 	GetFloat32(key string) (float32, error)
 	GetFloat64(key string) (float64, error)
 	GetComplex64(key string) (complex64, error)
@@ -41,6 +43,7 @@ type Conf interface {
 	TryGetComplex128(key string, defaultValue complex128) complex128
 	TryGetString(key string, defaultValue string) string
 	GetSection(key string) ConfSection
+	GetArraySection(key string) ConfArraySection
 	//Unmarshal(key string, out interface{}) error  // to be supported in the future
 }
 
@@ -58,8 +61,12 @@ type ConfRoot interface {
 
 type ConfSection interface {
 	Conf
-	GetSectionKey() string
-	GetSectionPath() string
+}
+
+type ConfArraySection interface {
+	Conf
+	Length() int
+	GetIndexSection(idx int) ConfSection
 }
 
 type ConfChanges interface {

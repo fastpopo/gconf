@@ -17,9 +17,8 @@ func main() {
 		Add(yamlSource).
 		Build()
 
-	pairs := conf.ToArray()
+	pairs := conf.ToKeyValuePairs()
 	for _, p := range pairs {
 		fmt.Printf("Key: %v, Value: %v\n", p.Key, p.Value)
 	}
 }
-

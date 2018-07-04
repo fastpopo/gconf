@@ -1,8 +1,8 @@
 package gconf
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"reflect"
 
 	"gopkg.in/yaml.v2"
@@ -23,7 +23,7 @@ func (s *YamlConfSource) Build(builder ConfBuilder) ConfProvider {
 }
 
 func (s *YamlConfSource) Load() (map[string]interface{}, error) {
-	parser := newYamlConfParser(RootPath, KeyDelimiter)
+	parser := newYamlConfParser(RootPath, PathDelimiter)
 	err := parser.Parse(s.yamlMessage)
 
 	if err != nil {
@@ -32,7 +32,6 @@ func (s *YamlConfSource) Load() (map[string]interface{}, error) {
 
 	return parser.GetDataMap(), nil
 }
-
 
 type yamlConfParser struct {
 	dataMap      map[string]interface{}
@@ -99,7 +98,7 @@ func (p *yamlConfParser) parseArray(raw interface{}, parentKey string) {
 	}
 
 	for idx, v := range data {
-		newPath := PathCombine(parentKey, fmt.Sprint(idx))
+		newPath := PathCombine(parentKey, ArrayDelimiter+ fmt.Sprint(idx))
 		p.parse(v, newPath)
 	}
 }

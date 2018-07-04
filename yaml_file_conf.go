@@ -45,7 +45,7 @@ func (s *YamlFileConfSource) Load() (map[string]interface{}, error) {
 		return data, nil
 	}
 
-	parser := newYamlConfParser(RootPath, KeyDelimiter)
+	parser := newYamlConfParser(RootPath, PathDelimiter)
 	err = parser.Parse(stream)
 
 	if err != nil {

@@ -1,10 +1,15 @@
 package gconf
 
-import "strings"
+import (
+	"strings"
+	"fmt"
+	"strconv"
+)
 
 const (
-	KeyDelimiter string = "/"
-	RootPath     string = "/"
+	PathDelimiter  = "/"
+	RootPath       = "/"
+	ArrayDelimiter = "$"
 )
 
 func PathCombine(path ...string) string {
@@ -12,12 +17,15 @@ func PathCombine(path ...string) string {
 		return ""
 	}
 
-	if path[0] == RootPath {
-		path = path[1:]
-		return RootPath + strings.Join(path, KeyDelimiter)
+	p := strings.Join(path, PathDelimiter)
+
+	if p == "" {
+		return ""
 	}
 
-	return strings.Join(path, KeyDelimiter)
+	pathEntity := NewStringSplitter(p).Split(PathDelimiter, true)
+
+	return RootPath + strings.Join(pathEntity, PathDelimiter)
 }
 
 func GetSectionKey(path string) string {
@@ -25,7 +33,11 @@ func GetSectionKey(path string) string {
 		return ""
 	}
 
-	idx := strings.LastIndex(path, KeyDelimiter)
+	if path == RootPath {
+		return RootPath
+	}
+
+	idx := strings.LastIndex(path, PathDelimiter)
 
 	if idx == -1 {
 		return path
@@ -35,14 +47,14 @@ func GetSectionKey(path string) string {
 }
 
 func GetParentPath(path string) string {
-	if path == "" {
+	if path == "" || path == RootPath {
 		return ""
 	}
 
-	idx := strings.LastIndex(path, KeyDelimiter)
+	idx := strings.LastIndex(path, PathDelimiter)
 
-	if idx == -1 {
-		return ""
+	if idx == -1 || idx == 0 {
+		return RootPath
 	}
 
 	return path[0:idx]
@@ -53,7 +65,10 @@ func HasPathInKey(path, key string) bool {
 }
 
 func GetPaths(key string) []string {
-	return strings.Split(key, KeyDelimiter)
+	paths := make([]string, 0)
+	paths = append(paths, RootPath)
+	paths = append(NewStringSplitter(key).Split(PathDelimiter, true))
+	return paths
 }
 
 func FindChildKeys(basePath string, keys []string) []string {
@@ -74,4 +89,120 @@ func FindChildKeys(basePath string, keys []string) []string {
 	}
 
 	return subKeys
+}
+
+func FindChildPairs(basePath string, pairs []KeyValuePair) []KeyValuePair {
+	if pairs == nil || len(pairs) == 0 {
+		return nil
+	}
+
+	if basePath == RootPath {
+		return pairs
+	}
+
+	var subPairs []KeyValuePair
+
+	for _, p := range pairs {
+		if HasPathInKey(basePath, p.Key) {
+			subPairs = append(subPairs, p)
+		}
+	}
+
+	return subPairs
+}
+
+func IsArrayPath(path string, keys []string) bool {
+	if path == "" {
+		return false
+	}
+
+	if keys == nil || len(keys) == 0 {
+		return false
+	}
+
+	checkIdxString := GetArrayIndexPath(path, 0)
+
+	if checkIdxString == "" {
+		return false
+	}
+
+	for _, k := range keys {
+		if HasPathInKey(checkIdxString, k) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func GetArrayIndex(idx int) string {
+	if idx < 0 {
+		return ""
+	}
+
+	return ArrayDelimiter + fmt.Sprint(idx)
+}
+
+func GetArrayIndexPath(path string, idx int) string {
+	if path == "" {
+		return ""
+	}
+
+	if idx < 0 {
+		return ""
+	}
+
+	return PathCombine(path, GetArrayIndex(idx))
+}
+
+func LengthOfArrayPath(path string, keys []string) int {
+	maxIndex := -1
+
+	if path == "" {
+		return maxIndex
+	}
+
+	if keys == nil || len(keys) == 0 {
+		return maxIndex
+	}
+
+	checkIdxString := PathCombine(path, ArrayDelimiter)
+
+	for _, k := range keys {
+		if HasPathInKey(checkIdxString, k) {
+			index := parseIndexOfArray(checkIdxString, k)
+
+			if index > maxIndex {
+				maxIndex = index
+			}
+		}
+	}
+
+	if maxIndex == -1 {
+		return -1
+	}
+
+	// increase size for it's length not index
+	return maxIndex + 1
+}
+
+func parseIndexOfArray(checkIdxString, key string) int {
+	newKey := strings.Replace(key, checkIdxString, "", -1)
+
+	if newKey == "" {
+		return -1
+	}
+
+	idx := strings.Index(newKey, PathDelimiter)
+
+	if idx != -1 {
+		newKey = newKey[:idx]
+	}
+
+	findIdx, err := strconv.Atoi(newKey)
+	if err != nil {
+		return -1
+	}
+
+	return findIdx
 }

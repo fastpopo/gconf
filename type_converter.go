@@ -63,7 +63,6 @@ func (t *TypeConverter) GetInt(key string) (int, error) {
 	return defaultInt32, errorCantConvert
 }
 
-
 func (t *TypeConverter) GetInt64(key string) (int64, error) {
 	if key == "" {
 		return defaultInt64, errorInvalidArgument
@@ -433,7 +432,6 @@ func (t *TypeConverter) TryGetComplex128(key string, defaultValue complex128) co
 
 	return v
 }
-
 
 func (t *TypeConverter) TryGetByte(key string, defaultValue byte) byte {
 	if key == "" {

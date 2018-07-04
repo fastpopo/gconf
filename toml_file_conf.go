@@ -45,7 +45,7 @@ func (s *TomlFileConfSource) Load() (map[string]interface{}, error) {
 		return data, nil
 	}
 
-	parser := newTomlConfParser(RootPath, KeyDelimiter)
+	parser := newTomlConfParser(RootPath, PathDelimiter)
 	err = parser.Parse(stream)
 
 	if err != nil {

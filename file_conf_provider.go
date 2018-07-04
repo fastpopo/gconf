@@ -1,11 +1,12 @@
 package gconf
 
 import (
-	"log"
 	"errors"
+	"log"
 )
 
 type fileConfProvider struct {
+	path        string
 	data        map[string]interface{}
 	source      FileConfSource
 	converter   TypeConverter
@@ -15,6 +16,7 @@ type fileConfProvider struct {
 
 func NewFileConfProvider(source FileConfSource) FileConfProvider {
 	p := &fileConfProvider{
+		path:        RootPath,
 		source:      source,
 		changeToken: nil,
 		data:        make(map[string]interface{}),
@@ -27,35 +29,39 @@ func NewFileConfProvider(source FileConfSource) FileConfProvider {
 	return p
 }
 
-func (p *fileConfProvider) bindFileWatcher() {
-	if p.fileWatcher != nil {
-		p.fileWatcher.Close()
-		p.fileWatcher = nil
+func (c *fileConfProvider) bindFileWatcher() {
+	if c.fileWatcher != nil {
+		c.fileWatcher.Close()
+		c.fileWatcher = nil
 	}
 
-	p.changeToken = NewChangeToken()
+	c.changeToken = NewChangeToken()
 
-	if p.source.GetOnConfChangedCallback() == nil {
+	if c.source.GetOnConfChangedCallback() == nil {
 		return
 	}
 
-	p.changeToken.SetCallback(p.OnChanged)
-	watcher, err := NewFileWatcher(p.source.GetFilePath())
+	c.changeToken.SetCallback(c.OnChanged)
+	watcher, err := NewFileWatcher(c.source.GetFilePath())
 
 	if err != nil {
 		log.Println("can't start the filewatcher: " + err.Error())
 	} else {
-		p.fileWatcher = watcher
-		p.fileWatcher.Watch(p.changeToken)
+		c.fileWatcher = watcher
+		c.fileWatcher.Watch(c.changeToken)
 	}
 }
 
-func (p *fileConfProvider) Get(key string) interface{} {
+func (c *fileConfProvider) GetPath() string {
+	return c.path
+}
+
+func (c *fileConfProvider) Get(key string) interface{} {
 	if key == "" {
 		return nil
 	}
 
-	value, exist := p.data[key]
+	value, exist := c.data[key]
 
 	if exist == false {
 		return nil
@@ -64,50 +70,50 @@ func (p *fileConfProvider) Get(key string) interface{} {
 	return value
 }
 
-func (p *fileConfProvider) Set(key string, value interface{}) error {
+func (c *fileConfProvider) Set(key string, value interface{}) error {
 	if key == "" {
 		return errors.New("[FileConfProvider::Set] invalid null argument: key")
 	}
 
-	p.data[key] = value
+	c.data[key] = value
 	return nil
 }
 
-func (p *fileConfProvider) ContainKey(key string) bool {
+func (c *fileConfProvider) ContainKey(key string) bool {
 	if key == "" {
 		return false
 	}
 
-	_, exist := p.data[key]
+	_, exist := c.data[key]
 
 	return exist
 }
 
-func (p *fileConfProvider) Keys() []string {
+func (c *fileConfProvider) Keys() []string {
 
 	var keys []string
 
-	for k := range p.data {
+	for k := range c.data {
 		keys = append(keys, k)
 	}
 
 	return keys
 }
 
-func (p *fileConfProvider) Values() []interface{} {
+func (c *fileConfProvider) Values() []interface{} {
 	var values []interface{}
 
-	for _, v := range p.data {
+	for _, v := range c.data {
 		values = append(values, v)
 	}
 
 	return values
 }
 
-func (p *fileConfProvider) ToArray() []KeyValuePair {
+func (c *fileConfProvider) ToKeyValuePairs() []KeyValuePair {
 	var pairs []KeyValuePair
 
-	for k, v := range p.data {
+	for k, v := range c.data {
 
 		pair := KeyValuePair{
 			Key:   k,
@@ -120,100 +126,104 @@ func (p *fileConfProvider) ToArray() []KeyValuePair {
 	return pairs
 }
 
-func (p *fileConfProvider) IsEmpty() bool {
-	return len(p.data) == 0
+func (c *fileConfProvider) IsEmpty() bool {
+	return len(c.data) == 0
 }
 
-func (p *fileConfProvider) GetInt(key string) (int, error) {
-	return p.converter.GetInt(key)
+func (c *fileConfProvider) IsArray() bool {
+	return c.GetSection(c.path).IsArray()
 }
 
-func (p *fileConfProvider) GetInt64(key string) (int64, error) {
-	return p.converter.GetInt64(key)
+func (c *fileConfProvider) GetInt(key string) (int, error) {
+	return c.converter.GetInt(key)
 }
 
-func (p *fileConfProvider) GetUint(key string) (uint, error) {
-	return p.converter.GetUint(key)
+func (c *fileConfProvider) GetInt64(key string) (int64, error) {
+	return c.converter.GetInt64(key)
 }
 
-func (p *fileConfProvider) GetUint64(key string) (uint64, error) {
-	return p.converter.GetUint64(key)
+func (c *fileConfProvider) GetUint(key string) (uint, error) {
+	return c.converter.GetUint(key)
 }
 
-func (p *fileConfProvider) GetFloat32(key string) (float32, error) {
-	return p.converter.GetFloat32(key)
+func (c *fileConfProvider) GetUint64(key string) (uint64, error) {
+	return c.converter.GetUint64(key)
 }
 
-func (p *fileConfProvider) GetFloat64(key string) (float64, error) {
-	return p.converter.GetFloat64(key)
+func (c *fileConfProvider) GetFloat32(key string) (float32, error) {
+	return c.converter.GetFloat32(key)
 }
 
-func (p *fileConfProvider) GetByte(key string) (byte, error) {
-	return p.converter.GetByte(key)
+func (c *fileConfProvider) GetFloat64(key string) (float64, error) {
+	return c.converter.GetFloat64(key)
 }
 
-func (p *fileConfProvider) GetBoolean(key string) (bool, error) {
-	return p.converter.GetBoolean(key)
+func (c *fileConfProvider) GetByte(key string) (byte, error) {
+	return c.converter.GetByte(key)
 }
 
-func (p *fileConfProvider) GetComplex64(key string) (complex64, error) {
-	return p.converter.GetComplex64(key)
+func (c *fileConfProvider) GetBoolean(key string) (bool, error) {
+	return c.converter.GetBoolean(key)
 }
 
-func (p *fileConfProvider) GetComplex128(key string) (complex128, error) {
-	return p.converter.GetComplex128(key)
+func (c *fileConfProvider) GetComplex64(key string) (complex64, error) {
+	return c.converter.GetComplex64(key)
 }
 
-func (p *fileConfProvider) GetString(key string) (string, error) {
-	return p.converter.GetString(key)
+func (c *fileConfProvider) GetComplex128(key string) (complex128, error) {
+	return c.converter.GetComplex128(key)
 }
 
-func (p *fileConfProvider) TryGetInt(key string, defaultValue int) int {
-	return p.converter.TryGetInt(key, defaultValue)
+func (c *fileConfProvider) GetString(key string) (string, error) {
+	return c.converter.GetString(key)
 }
 
-func (p *fileConfProvider) TryGetInt64(key string, defaultValue int64) int64 {
-	return p.converter.TryGetInt64(key, defaultValue)
+func (c *fileConfProvider) TryGetInt(key string, defaultValue int) int {
+	return c.converter.TryGetInt(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetUint(key string, defaultValue uint) uint {
-	return p.converter.TryGetUint(key, defaultValue)
+func (c *fileConfProvider) TryGetInt64(key string, defaultValue int64) int64 {
+	return c.converter.TryGetInt64(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetUint64(key string, defaultValue uint64) uint64 {
-	return p.converter.TryGetUint64(key, defaultValue)
+func (c *fileConfProvider) TryGetUint(key string, defaultValue uint) uint {
+	return c.converter.TryGetUint(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetFloat32(key string, defaultValue float32) float32 {
-	return p.converter.TryGetFloat32(key, defaultValue)
+func (c *fileConfProvider) TryGetUint64(key string, defaultValue uint64) uint64 {
+	return c.converter.TryGetUint64(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetFloat64(key string, defaultValue float64) float64 {
-	return p.converter.TryGetFloat64(key, defaultValue)
+func (c *fileConfProvider) TryGetFloat32(key string, defaultValue float32) float32 {
+	return c.converter.TryGetFloat32(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetByte(key string, defaultValue byte) byte {
-	return p.converter.TryGetByte(key, defaultValue)
+func (c *fileConfProvider) TryGetFloat64(key string, defaultValue float64) float64 {
+	return c.converter.TryGetFloat64(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetBoolean(key string, defaultValue bool) bool {
-	return p.converter.TryGetBoolean(key, defaultValue)
+func (c *fileConfProvider) TryGetByte(key string, defaultValue byte) byte {
+	return c.converter.TryGetByte(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetComplex64(key string, defaultValue complex64) complex64 {
-	return p.converter.TryGetComplex64(key, defaultValue)
+func (c *fileConfProvider) TryGetBoolean(key string, defaultValue bool) bool {
+	return c.converter.TryGetBoolean(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetComplex128(key string, defaultValue complex128) complex128 {
-	return p.converter.TryGetComplex128(key, defaultValue)
+func (c *fileConfProvider) TryGetComplex64(key string, defaultValue complex64) complex64 {
+	return c.converter.TryGetComplex64(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGetString(key string, defaultValue string) string {
-	return p.converter.TryGetString(key, defaultValue)
+func (c *fileConfProvider) TryGetComplex128(key string, defaultValue complex128) complex128 {
+	return c.converter.TryGetComplex128(key, defaultValue)
 }
 
-func (p *fileConfProvider) TryGet(key string, defaultValue interface{}) interface{} {
-	value := p.Get(key)
+func (c *fileConfProvider) TryGetString(key string, defaultValue string) string {
+	return c.converter.TryGetString(key, defaultValue)
+}
+
+func (c *fileConfProvider) TryGet(key string, defaultValue interface{}) interface{} {
+	value := c.Get(key)
 
 	if value == nil {
 		return defaultValue
@@ -222,64 +232,68 @@ func (p *fileConfProvider) TryGet(key string, defaultValue interface{}) interfac
 	return value
 }
 
-func (p *fileConfProvider) GetSection(key string) ConfSection {
-	return NewConfSection(p, key)
+func (c *fileConfProvider) GetSection(key string) ConfSection {
+	return NewConfSection(c, PathCombine(c.path, key))
 }
 
-func (p *fileConfProvider) Reload() {
-	p.Load()
+func (c *fileConfProvider) GetArraySection(key string) ConfArraySection {
+	return NewConfArraySection(c, PathCombine(c.path, key))
 }
 
-func (p *fileConfProvider) GetChangeToken() ChangeToken {
-	return p.changeToken
+func (c *fileConfProvider) Reload() {
+	c.Load()
 }
 
-func (p *fileConfProvider) Load() {
-	isExist := p.source.IsFileExist()
-	filePath := p.source.GetFilePath()
+func (c *fileConfProvider) GetChangeToken() ChangeToken {
+	return c.changeToken
+}
 
-	if !isExist && !p.source.IsEndureIfNotExist() {
+func (c *fileConfProvider) Load() {
+	isExist := c.source.IsFileExist()
+	filePath := c.source.GetFilePath()
+
+	if !isExist && !c.source.IsEndureIfNotExist() {
 		log.Fatalf("can't find the configuration file: %s\n", filePath)
 	}
 
 	if !isExist {
 		log.Printf("can't find the configuration file: %s\n", filePath)
-		p.data = make(map[string]interface{})
+		c.data = make(map[string]interface{})
 		return
 	}
 
-	data, err := p.source.Load()
+	data, err := c.source.Load()
 	if err != nil {
 		log.Printf("can't load the configuration file[%s], err: %s\n", filePath, err.Error())
 		return
 	}
 
-	p.data = data
+	c.data = data
 }
 
-func (p *fileConfProvider) OnChanged() {
+func (c *fileConfProvider) OnChanged() {
 
-	changedData, err := p.source.Load()
+	changedData, err := c.source.Load()
 
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
 
-	changes := CalcConfChanges(changedData, p.data)
+	changes := CalcConfChanges(changedData, c.data)
 
 	if changes.GetNumOfChanges() == 0 {
 		log.Println("there is no changes in file configuration provider")
 		return
 	}
 
-	p.data = changedData
-	p.bindFileWatcher()
+	c.data = changedData
+	c.bindFileWatcher()
 
-	go p.source.GetOnConfChangedCallback()(changes)
+	go c.source.GetOnConfChangedCallback()(changes)
 }
 
-func (p *fileConfProvider) Dispose() {
-	p.fileWatcher.Close()
-	p.data = nil
+func (c *fileConfProvider) Dispose() {
+	c.fileWatcher.Close()
+	c.data = nil
 }

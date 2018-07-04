@@ -5,7 +5,7 @@ import "fmt"
 type ChangeMode int
 
 const (
-	Created  ChangeMode = iota
+	Created ChangeMode = iota
 	Removed
 	Modified
 )
@@ -25,7 +25,7 @@ func (c *confChanges) GetChanges() []Change {
 func EmptyConfChanges() ConfChanges {
 	var changes []Change
 
-	return &confChanges {
+	return &confChanges{
 		changes: changes,
 	}
 }
@@ -86,7 +86,7 @@ func CalcConfChanges(current map[string]interface{}, prev map[string]interface{}
 }
 
 func newConfChanges(changes []Change) *confChanges {
-	return &confChanges {
+	return &confChanges{
 		changes: changes,
 	}
 }
@@ -101,8 +101,8 @@ type Change struct {
 func newChanges(keyName string, mode ChangeMode, prev interface{}, current interface{}) Change {
 	return Change{
 		KeyName: keyName,
-		Mode: mode,
-		Prev: prev,
+		Mode:    mode,
+		Prev:    prev,
 		Current: current,
 	}
 }

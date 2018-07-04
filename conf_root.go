@@ -5,18 +5,24 @@ import (
 )
 
 type confRoot struct {
-	providers   []ConfProvider
-	converter   TypeConverter
+	path      string
+	providers []ConfProvider
+	converter TypeConverter
 }
 
 func newConfRoot(providers []ConfProvider) ConfRoot {
 	root := &confRoot{
+		path: RootPath,
 		providers: providers,
 	}
 
 	root.converter = NewTypeConverter(root)
 
 	return root
+}
+
+func (c *confRoot) GetPath() string {
+	return c.path
 }
 
 func (c *confRoot) Get(key string) interface{} {
@@ -91,13 +97,13 @@ func (c *confRoot) Values() []interface{} {
 	return values
 }
 
-func (c *confRoot) ToArray() []KeyValuePair {
+func (c *confRoot) ToKeyValuePairs() []KeyValuePair {
 	pairMap := c.getCombinedMap()
 
 	var pairs []KeyValuePair
 	for k, v := range pairMap {
-		pair := KeyValuePair {
-			Key: k,
+		pair := KeyValuePair{
+			Key:   k,
 			Value: v,
 		}
 		pairs = append(pairs, pair)
@@ -116,11 +122,15 @@ func (c *confRoot) IsEmpty() bool {
 	return true
 }
 
+func (c *confRoot) IsArray() bool {
+	return c.GetSection(c.path).IsArray()
+}
+
 func (c *confRoot) getCombinedMap() map[string]interface{} {
 	pairMap := make(map[string]interface{})
 
-	for i := len(c.providers) - 1; i >= 0; i -- {
-		subPairs := c.providers[i].ToArray()
+	for i := len(c.providers) - 1; i >= 0; i-- {
+		subPairs := c.providers[i].ToKeyValuePairs()
 
 		if subPairs == nil || len(subPairs) == 0 {
 			continue
@@ -237,9 +247,12 @@ func (c *confRoot) TryGetString(key string, defaultValue string) string {
 }
 
 func (c *confRoot) GetSection(key string) ConfSection {
-	return NewConfSection(c, key)
+	return NewConfSection(c, PathCombine(c.path, key))
 }
 
+func (c *confRoot) GetArraySection(key string) ConfArraySection {
+	return NewConfArraySection(c, PathCombine(c.path, key))
+}
 
 func (c *confRoot) Reload() {
 	for _, p := range c.providers {

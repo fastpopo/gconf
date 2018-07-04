@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/fastpopo/gconf"
 	"fmt"
+	"github.com/fastpopo/gconf"
 )
 
 func main() {
@@ -13,11 +13,8 @@ func main() {
 		Add(src).
 		Build()
 
-	for _, s := range conf.ToArray() {
+	for _, s := range conf.ToKeyValuePairs() {
 		fmt.Printf("Key: %s, Value: %v\n", s.Key, s.Value)
 	}
-
-
-
 
 }

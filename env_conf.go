@@ -6,12 +6,12 @@ import (
 )
 
 type EnvConfSource struct {
-	prefix        string
+	prefix string
 }
 
 func NewEnvConfSource() *EnvConfSource {
 	return &EnvConfSource{
-		prefix:        "",
+		prefix: "",
 	}
 }
 
