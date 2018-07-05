@@ -21,12 +21,17 @@ func (c *configurationBuilder) GetSources() []ConfSource {
 	return c.sources
 }
 
-func (c *configurationBuilder) Build() ConfRoot {
+func (c *configurationBuilder) Build() (ConfRoot, error) {
 
 	var providers []ConfProvider
 
 	for i := len(c.sources) - 1; i >= 0; i-- {
-		provider := c.sources[i].Build(c)
+		provider, err := c.sources[i].Build(c)
+
+		if err != nil {
+			return nil, err
+		}
+
 		if provider == nil {
 			continue
 		}
@@ -34,5 +39,5 @@ func (c *configurationBuilder) Build() ConfRoot {
 		providers = append(providers, provider)
 	}
 
-	return newConfRoot(providers)
+	return newConfRoot(providers), nil
 }

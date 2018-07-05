@@ -19,7 +19,7 @@ func NewTomlFileConfSource(path string) *TomlFileConfSource {
 	}
 }
 
-func (s *TomlFileConfSource) Build(builder ConfBuilder) ConfProvider {
+func (s *TomlFileConfSource) Build(builder ConfBuilder) (ConfProvider, error) {
 	return NewFileConfProvider(s)
 }
 

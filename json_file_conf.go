@@ -19,7 +19,7 @@ func NewJsonFileConfSource(path string) *JsonFileConfSource {
 	}
 }
 
-func (s *JsonFileConfSource) Build(builder ConfBuilder) ConfProvider {
+func (s *JsonFileConfSource) Build(builder ConfBuilder) (ConfProvider, error) {
 	return NewFileConfProvider(s)
 }
 

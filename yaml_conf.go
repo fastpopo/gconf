@@ -18,7 +18,7 @@ func NewYamlConfSource(yamlMessage []byte) *YamlConfSource {
 	}
 }
 
-func (s *YamlConfSource) Build(builder ConfBuilder) ConfProvider {
+func (s *YamlConfSource) Build(builder ConfBuilder) (ConfProvider, error) {
 	return NewConfProvider(s)
 }
 

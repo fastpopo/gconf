@@ -17,7 +17,7 @@ func NewJsonConfSource(jsonMessage []byte) *JsonConfSource {
 	}
 }
 
-func (s *JsonConfSource) Build(confBuilder ConfBuilder) ConfProvider {
+func (s *JsonConfSource) Build(confBuilder ConfBuilder) (ConfProvider, error) {
 	return NewConfProvider(s)
 }
 

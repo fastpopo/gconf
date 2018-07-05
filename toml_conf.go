@@ -18,7 +18,7 @@ func NewTomlConfSource(tomlMessage []byte) *TomlConfSource {
 	}
 }
 
-func (s *TomlConfSource) Build(confBuilder ConfBuilder) ConfProvider {
+func (s *TomlConfSource) Build(confBuilder ConfBuilder) (ConfProvider, error) {
 	return NewConfProvider(s)
 }
 

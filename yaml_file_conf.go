@@ -19,7 +19,7 @@ func NewYamlFileConfSource(path string) *YamlFileConfSource {
 	}
 }
 
-func (s *YamlFileConfSource) Build(builder ConfBuilder) ConfProvider {
+func (s *YamlFileConfSource) Build(builder ConfBuilder) (ConfProvider, error) {
 	return NewFileConfProvider(s)
 }
 

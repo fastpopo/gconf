@@ -2,7 +2,6 @@ package gconf
 
 import (
 	"errors"
-	"log"
 )
 
 type confProvider struct {
@@ -13,7 +12,7 @@ type confProvider struct {
 	changeToken ChangeToken
 }
 
-func NewConfProvider(source ConfSource) ConfProvider {
+func NewConfProvider(source ConfSource) (ConfProvider, error) {
 	p := &confProvider{
 		path:        RootPath,
 		source:      source,
@@ -21,9 +20,12 @@ func NewConfProvider(source ConfSource) ConfProvider {
 	}
 
 	p.converter = NewTypeConverter(p)
-	p.Load()
 
-	return p
+	if err := p.Load(); err != nil {
+		return nil, err
+	}
+
+	return p, nil
 }
 
 func (c *confProvider) GetPath() string {
@@ -212,8 +214,8 @@ func (c *confProvider) GetArraySection(key string) ConfArraySection {
 	return NewConfArraySection(c, PathCombine(c.path, key))
 }
 
-func (c *confProvider) Reload() {
-	c.Load()
+func (c *confProvider) Reload() error {
+	return c.Load()
 }
 
 func (c *confProvider) GetCallback() func(ConfChanges) {
@@ -224,15 +226,15 @@ func (c *confProvider) GetChangeToken() ChangeToken {
 	return c.changeToken
 }
 
-func (c *confProvider) Load() {
+func (c *confProvider) Load() error {
 	data, err := c.source.Load()
 
 	if err != nil {
-		log.Printf("can't load the configuration map from ConfSource: " + err.Error())
-		return
+		return errors.New("can't load the configuration map from ConfSource: " + err.Error())
 	}
 
 	c.data = data
+	return nil
 }
 
 func (c *confProvider) Dispose() {

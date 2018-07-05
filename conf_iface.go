@@ -50,12 +50,12 @@ type Conf interface {
 type ConfBuilder interface {
 	Add(confSource ConfSource) ConfBuilder
 	GetSources() []ConfSource
-	Build() ConfRoot
+	Build() (ConfRoot, error)
 }
 
 type ConfRoot interface {
 	Conf
-	Reload()
+	Reload() error
 	Dispose()
 }
 
@@ -76,14 +76,14 @@ type ConfChanges interface {
 
 type ConfProvider interface {
 	Conf
-	Reload()
+	Load() error
+	Reload() error
 	Dispose()
-	Load()
 	GetChangeToken() ChangeToken
 }
 
 type ConfSource interface {
-	Build(confBuilder ConfBuilder) ConfProvider
+	Build(confBuilder ConfBuilder) (ConfProvider, error)
 	Load() (map[string]interface{}, error)
 }
 

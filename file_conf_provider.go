@@ -3,6 +3,7 @@ package gconf
 import (
 	"errors"
 	"log"
+	"fmt"
 )
 
 type fileConfProvider struct {
@@ -14,7 +15,7 @@ type fileConfProvider struct {
 	fileWatcher Watcher
 }
 
-func NewFileConfProvider(source FileConfSource) FileConfProvider {
+func NewFileConfProvider(source FileConfSource) (FileConfProvider, error) {
 	p := &fileConfProvider{
 		path:        RootPath,
 		source:      source,
@@ -23,10 +24,14 @@ func NewFileConfProvider(source FileConfSource) FileConfProvider {
 	}
 
 	p.converter = NewTypeConverter(p)
-	p.Load()
+
+	if err := p.Load(); err != nil {
+		return nil, err
+	}
+
 	p.bindFileWatcher()
 
-	return p
+	return p, nil
 }
 
 func (c *fileConfProvider) bindFileWatcher() {
@@ -240,35 +245,35 @@ func (c *fileConfProvider) GetArraySection(key string) ConfArraySection {
 	return NewConfArraySection(c, PathCombine(c.path, key))
 }
 
-func (c *fileConfProvider) Reload() {
-	c.Load()
+func (c *fileConfProvider) Reload() error {
+	return c.Load()
 }
 
 func (c *fileConfProvider) GetChangeToken() ChangeToken {
 	return c.changeToken
 }
 
-func (c *fileConfProvider) Load() {
+func (c *fileConfProvider) Load() error {
 	isExist := c.source.IsFileExist()
 	filePath := c.source.GetFilePath()
 
 	if !isExist && !c.source.IsEndureIfNotExist() {
-		log.Fatalf("can't find the configuration file: %s\n", filePath)
+		return errors.New(fmt.Sprintf("can't find the configuration file: %s\n", filePath))
 	}
 
 	if !isExist {
 		log.Printf("can't find the configuration file: %s\n", filePath)
 		c.data = make(map[string]interface{})
-		return
+		return nil
 	}
 
 	data, err := c.source.Load()
 	if err != nil {
-		log.Printf("can't load the configuration file[%s], err: %s\n", filePath, err.Error())
-		return
+		return errors.New(fmt.Sprintf("can't load the configuration file[%s], err: %s\n", filePath, err.Error()))
 	}
 
 	c.data = data
+	return nil
 }
 
 func (c *fileConfProvider) OnChanged() {

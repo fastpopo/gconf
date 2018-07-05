@@ -15,7 +15,7 @@ func NewEnvConfSource() *EnvConfSource {
 	}
 }
 
-func (s *EnvConfSource) Build(builder ConfBuilder) ConfProvider {
+func (s *EnvConfSource) Build(builder ConfBuilder) (ConfProvider, error) {
 	return NewConfProvider(s)
 }
 

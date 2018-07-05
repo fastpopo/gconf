@@ -254,14 +254,18 @@ func (c *confRoot) GetArraySection(key string) ConfArraySection {
 	return NewConfArraySection(c, PathCombine(c.path, key))
 }
 
-func (c *confRoot) Reload() {
+func (c *confRoot) Reload() error {
 	for _, p := range c.providers {
 		if !p.GetChangeToken().HasChanged() {
 			continue
 		}
 
-		p.Load()
+		if err := p.Load(); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func (c *confRoot) Dispose() {

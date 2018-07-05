@@ -7,7 +7,7 @@ func NewMapConfSource(conf map[string]interface{}) *MemConfSource {
 	return &MemConfSource{}
 }
 
-func (s *MemConfSource) Build(builder ConfBuilder) ConfProvider {
+func (s *MemConfSource) Build(builder ConfBuilder) (ConfProvider, error) {
 	return NewConfProvider(s)
 }
 
