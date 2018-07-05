@@ -111,6 +111,27 @@ func FindChildPairs(basePath string, pairs []KeyValuePair) []KeyValuePair {
 	return subPairs
 }
 
+func IsArrayIndex(path string) bool {
+	sectionKey := GetSectionKey(path)
+
+	if sectionKey == "" {
+		return false
+	}
+
+	if len(sectionKey) >= 2 {
+		return false
+	}
+
+	idxStr := sectionKey[1:]
+
+	_, err := strconv.Atoi(idxStr)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 func IsArrayPath(path string, keys []string) bool {
 	if path == "" {
 		return false
