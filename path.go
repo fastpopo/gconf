@@ -47,8 +47,12 @@ func GetSectionKey(path string) string {
 }
 
 func GetParentPath(path string) string {
-	if path == "" || path == RootPath {
+	if path == "" {
 		return ""
+	}
+
+	if path == RootPath {
+		return RootPath
 	}
 
 	idx := strings.LastIndex(path, PathDelimiter)
@@ -57,7 +61,13 @@ func GetParentPath(path string) string {
 		return RootPath
 	}
 
-	return path[0:idx]
+	newPath := path[:idx]
+
+	if IsArrayIndex(newPath) {
+		return GetParentPath(newPath)
+	}
+
+	return newPath
 }
 
 func HasPathInKey(path, key string) bool {
@@ -118,7 +128,11 @@ func IsArrayIndex(path string) bool {
 		return false
 	}
 
-	if len(sectionKey) >= 2 {
+	if len(sectionKey) < 2 {
+		return false
+	}
+
+	if sectionKey[:1] != ArrayDelimiter {
 		return false
 	}
 
