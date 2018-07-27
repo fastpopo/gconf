@@ -37,10 +37,6 @@ func NewTypeConverter(confBase ConfBase) TypeConverter {
 }
 
 func (t *TypeConverter) GetInt(key string) (int, error) {
-	if key == "" {
-		return defaultInt32, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -64,10 +60,6 @@ func (t *TypeConverter) GetInt(key string) (int, error) {
 }
 
 func (t *TypeConverter) GetInt64(key string) (int64, error) {
-	if key == "" {
-		return defaultInt64, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -91,10 +83,6 @@ func (t *TypeConverter) GetInt64(key string) (int64, error) {
 }
 
 func (t *TypeConverter) GetUint(key string) (uint, error) {
-	if key == "" {
-		return defaultUint32, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -118,10 +106,6 @@ func (t *TypeConverter) GetUint(key string) (uint, error) {
 }
 
 func (t *TypeConverter) GetUint64(key string) (uint64, error) {
-	if key == "" {
-		return defaultUint64, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -145,10 +129,6 @@ func (t *TypeConverter) GetUint64(key string) (uint64, error) {
 }
 
 func (t *TypeConverter) GetFloat32(key string) (float32, error) {
-	if key == "" {
-		return defaultFloat32, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -171,10 +151,6 @@ func (t *TypeConverter) GetFloat32(key string) (float32, error) {
 }
 
 func (t *TypeConverter) GetFloat64(key string) (float64, error) {
-	if key == "" {
-		return defaultFloat64, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -197,10 +173,6 @@ func (t *TypeConverter) GetFloat64(key string) (float64, error) {
 }
 
 func (t *TypeConverter) GetComplex64(key string) (complex64, error) {
-	if key == "" {
-		return defaultComplex64, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -224,10 +196,6 @@ func (t *TypeConverter) GetComplex64(key string) (complex64, error) {
 }
 
 func (t *TypeConverter) GetComplex128(key string) (complex128, error) {
-	if key == "" {
-		return defaultComplex128, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -251,10 +219,6 @@ func (t *TypeConverter) GetComplex128(key string) (complex128, error) {
 }
 
 func (t *TypeConverter) GetByte(key string) (byte, error) {
-	if key == "" {
-		return defaultByte, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -278,10 +242,6 @@ func (t *TypeConverter) GetByte(key string) (byte, error) {
 }
 
 func (t *TypeConverter) GetBoolean(key string) (bool, error) {
-	if key == "" {
-		return defaultBool, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -301,10 +261,6 @@ func (t *TypeConverter) GetBoolean(key string) (bool, error) {
 }
 
 func (t *TypeConverter) GetString(key string) (string, error) {
-	if key == "" {
-		return defaultString, errorInvalidArgument
-	}
-
 	value := t.confBase.Get(key)
 
 	if value == nil {
@@ -322,10 +278,6 @@ func (t *TypeConverter) GetString(key string) (string, error) {
 }
 
 func (t *TypeConverter) TryGetInt(key string, defaultValue int) int {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetInt(key)
 
 	if err != nil {
@@ -336,10 +288,6 @@ func (t *TypeConverter) TryGetInt(key string, defaultValue int) int {
 }
 
 func (t *TypeConverter) TryGetInt64(key string, defaultValue int64) int64 {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetInt64(key)
 
 	if err != nil {
@@ -350,10 +298,6 @@ func (t *TypeConverter) TryGetInt64(key string, defaultValue int64) int64 {
 }
 
 func (t *TypeConverter) TryGetUint(key string, defaultValue uint) uint {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetUint(key)
 
 	if err != nil {
@@ -364,10 +308,6 @@ func (t *TypeConverter) TryGetUint(key string, defaultValue uint) uint {
 }
 
 func (t *TypeConverter) TryGetUint64(key string, defaultValue uint64) uint64 {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetUint64(key)
 
 	if err != nil {
@@ -378,10 +318,6 @@ func (t *TypeConverter) TryGetUint64(key string, defaultValue uint64) uint64 {
 }
 
 func (t *TypeConverter) TryGetFloat32(key string, defaultValue float32) float32 {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetFloat32(key)
 
 	if err != nil {
@@ -392,10 +328,6 @@ func (t *TypeConverter) TryGetFloat32(key string, defaultValue float32) float32 
 }
 
 func (t *TypeConverter) TryGetFloat64(key string, defaultValue float64) float64 {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetFloat64(key)
 
 	if err != nil {
@@ -406,10 +338,6 @@ func (t *TypeConverter) TryGetFloat64(key string, defaultValue float64) float64 
 }
 
 func (t *TypeConverter) TryGetComplex64(key string, defaultValue complex64) complex64 {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetComplex64(key)
 
 	if err != nil {
@@ -420,10 +348,6 @@ func (t *TypeConverter) TryGetComplex64(key string, defaultValue complex64) comp
 }
 
 func (t *TypeConverter) TryGetComplex128(key string, defaultValue complex128) complex128 {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetComplex128(key)
 
 	if err != nil {
@@ -434,10 +358,6 @@ func (t *TypeConverter) TryGetComplex128(key string, defaultValue complex128) co
 }
 
 func (t *TypeConverter) TryGetByte(key string, defaultValue byte) byte {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetByte(key)
 
 	if err != nil {
@@ -448,10 +368,6 @@ func (t *TypeConverter) TryGetByte(key string, defaultValue byte) byte {
 }
 
 func (t *TypeConverter) TryGetBoolean(key string, defaultValue bool) bool {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetBoolean(key)
 
 	if err != nil {
@@ -462,10 +378,6 @@ func (t *TypeConverter) TryGetBoolean(key string, defaultValue bool) bool {
 }
 
 func (t *TypeConverter) TryGetString(key string, defaultValue string) string {
-	if key == "" {
-		return defaultValue
-	}
-
 	v, err := t.GetString(key)
 
 	if err != nil {

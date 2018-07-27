@@ -9,12 +9,13 @@ func main() {
 	src := gconf.NewYamlFileConfSource("test.yml").
 		SetEndureIfNotExist(false)
 
-	conf := gconf.NewConfBuilder().
-		Add(src).
-		Build()
+	conf, err := gconf.NewConfBuilder().Add(src).Build()
 
-	for _, s := range conf.ToKeyValuePairs() {
-		fmt.Printf("Key: %s, Value: %v\n", s.Key, s.Value)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 
+	for _, s := range conf.ToKeyValuePairs() {
+		fmt.Printf("Key: %s\n", s.Key)
+	}
 }

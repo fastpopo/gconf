@@ -1,9 +1,9 @@
 package gconf
 
 import (
-	"strings"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (

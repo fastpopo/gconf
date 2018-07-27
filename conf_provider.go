@@ -33,9 +33,7 @@ func (c *confProvider) GetPath() string {
 }
 
 func (c *confProvider) Get(key string) interface{} {
-	if key == "" {
-		return nil
-	}
+	key = PathCombine(c.path, key)
 
 	value, exist := c.data[key]
 
@@ -47,18 +45,14 @@ func (c *confProvider) Get(key string) interface{} {
 }
 
 func (c *confProvider) Set(key string, value interface{}) error {
-	if key == "" {
-		return errors.New("[envConfProvider::Set] invalid null argument: key")
-	}
+	key = PathCombine(c.path, key)
 
 	c.data[key] = value
 	return nil
 }
 
 func (c *confProvider) ContainKey(key string) bool {
-	if key == "" {
-		return false
-	}
+	key = PathCombine(c.path, key)
 
 	_, exist := c.data[key]
 

@@ -26,10 +26,6 @@ func (c *confRoot) GetPath() string {
 }
 
 func (c *confRoot) Get(key string) interface{} {
-	if key == "" {
-		return nil
-	}
-
 	for _, p := range c.providers {
 		if !p.ContainKey(key) {
 			continue
@@ -41,11 +37,6 @@ func (c *confRoot) Get(key string) interface{} {
 }
 
 func (c *confRoot) Set(key string, value interface{}) error {
-
-	if key == "" {
-		return errors.New("[confRoot::Set] invalid null argument: key")
-	}
-
 	if len(c.providers) == 0 {
 		return errors.New("[confRoot::Set] there is no configuration provider")
 	}
@@ -60,10 +51,6 @@ func (c *confRoot) Set(key string, value interface{}) error {
 }
 
 func (c *confRoot) ContainKey(key string) bool {
-	if key == "" {
-		return false
-	}
-
 	for _, p := range c.providers {
 		if p.ContainKey(key) {
 			return true
@@ -189,10 +176,6 @@ func (c *confRoot) GetString(key string) (string, error) {
 }
 
 func (c *confRoot) TryGet(key string, defaultValue interface{}) interface{} {
-	if key == "" {
-		return defaultValue
-	}
-
 	result := c.Get(key)
 
 	if result == nil {
