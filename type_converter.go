@@ -270,6 +270,14 @@ func (t *TypeConverter) GetString(key string) (string, error) {
 	v := reflect.ValueOf(value)
 
 	switch v.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return Int64ToString(v.Int()), nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return Uint64ToString(v.Uint()), nil
+	case reflect.Float32:
+		return Float32ToString(float32(v.Float())), nil
+	case reflect.Float64:
+		return Float64ToString(v.Float()), nil
 	case reflect.String:
 		return v.String(), nil
 	}
@@ -395,12 +403,20 @@ func StringToInt32(val string) (int, error) {
 	return strconv.Atoi(val)
 }
 
+func Int32ToString(val int) string {
+	return Int64ToString(int64(val))
+}
+
 func StringToInt64(val string) (int64, error) {
 	if val == "" {
 		return defaultInt64, errorInvalidArgument
 	}
 
 	return strconv.ParseInt(val, 10, 64)
+}
+
+func Int64ToString(val int64) string {
+	return strconv.FormatInt(val, 10)
 }
 
 func StringToUint32(val string) (uint, error) {
@@ -413,12 +429,20 @@ func StringToUint32(val string) (uint, error) {
 	return uint(v), err
 }
 
+func Uint32ToString(val uint32) string {
+	return Uint64ToString(uint64(val))
+}
+
 func StringToUint64(val string) (uint64, error) {
 	if val == "" {
 		return defaultUint64, errorInvalidArgument
 	}
 
 	return strconv.ParseUint(val, 10, 64)
+}
+
+func Uint64ToString(val uint64) string {
+	return strconv.FormatUint(val, 10)
 }
 
 func StringToFloat32(val string) (float32, error) {
@@ -435,12 +459,20 @@ func StringToFloat32(val string) (float32, error) {
 	return float32(v), nil
 }
 
+func Float32ToString(val float32) string {
+	return strconv.FormatFloat(float64(val), 'f', 6, 32)
+}
+
 func StringToFloat64(val string) (float64, error) {
 	if val == "" {
 		return defaultFloat64, errorInvalidArgument
 	}
 
 	return strconv.ParseFloat(val, 64)
+}
+
+func Float64ToString(val float64) string {
+	return strconv.FormatFloat(val, 'f', 15, 64)
 }
 
 func StringToByte(val string) (byte, error) {
@@ -457,10 +489,18 @@ func StringToByte(val string) (byte, error) {
 	return byte(v), nil
 }
 
+func ByteToString(val byte) string {
+	return Int64ToString(int64(val))
+}
+
 func StringToBoolean(val string) (bool, error) {
 	if val == "" {
 		return defaultBool, errorInvalidArgument
 	}
 
 	return strconv.ParseBool(val)
+}
+
+func BooleanToString(val bool) string {
+	return strconv.FormatBool(val)
 }
