@@ -460,7 +460,7 @@ func StringToFloat32(val string) (float32, error) {
 }
 
 func Float32ToString(val float32) string {
-	return strconv.FormatFloat(float64(val), 'f', 6, 32)
+	return strconv.FormatFloat(float64(val), 'f', -1, 32)
 }
 
 func StringToFloat64(val string) (float64, error) {
@@ -472,7 +472,7 @@ func StringToFloat64(val string) (float64, error) {
 }
 
 func Float64ToString(val float64) string {
-	return strconv.FormatFloat(val, 'f', 15, 64)
+	return strconv.FormatFloat(val, 'f', -1, 64)
 }
 
 func StringToByte(val string) (byte, error) {
