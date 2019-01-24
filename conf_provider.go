@@ -224,7 +224,7 @@ func (c *confProvider) Load() error {
 	data, err := c.source.Load()
 
 	if err != nil {
-		return errors.New("can't load the configuration map from ConfSource: " + err.Error())
+		return errors.New("can't load the contents: " + err.Error())
 	}
 
 	c.data = data
